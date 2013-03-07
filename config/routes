@@ -1,4 +1,11 @@
-/static StaticR Static getStatic
-/robots.txt     RobotsR     GET
+/static StaticR                 Static getStatic
+/robots.txt                     RobotsR                 GET
 
-/               HomeR       GET
+/                               HomeR                   GET
+
+/admin                          AdminR                  GET POST
+/admin/login                    AdminLoginR             GET POST
+/admin/removecat/#CategoryId    AdminRemoveCatR         GET
+/admin/newprod/#CategoryId      AdminNewProdR           GET POST
+/admin/removeprod/#ProductId    AdminRemoveProdR        GET
+/admin/pictures/#ProductId      AdminPicturesR          GET POST

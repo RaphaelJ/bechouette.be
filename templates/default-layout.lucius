@@ -1,5 +1,4 @@
 body {
-    /*background-image: url('@{StaticR img_pattern_png}');*/
     background-color: #DFDCDA;
 }
 
@@ -12,7 +11,7 @@ body {
     font-family: "arial", sans-serif;
     color: #897d76;
 
-    h1 {
+    h1, h2, h3, h4 {
         font-family: 'Strait', cursive;
     }
 
@@ -28,6 +27,7 @@ body {
     header {
         position: relative;
         height: 120px;
+        border-bottom: 2px solid #897d76;
 
         font-size: 16px;
         font-family: 'Strait', cursive;
@@ -50,6 +50,7 @@ body {
         li {
             margin: 0 10px;
             padding: 5px 10px;
+
             line-height: 30px;
 
             a:hover {
@@ -60,10 +61,22 @@ body {
         li:hover, li:active, li.enabled {
             border-top: 4px solid #ee1980;
         }
+
+        #info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+
+            font-size: 0.9em;
+        }
     }
 
     #main {
         border-bottom: 2px solid #897d76;
+
+        .page {
+            padding: 5px 15px;
+        }
     }
 
     footer {

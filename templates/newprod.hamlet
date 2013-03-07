@@ -1,0 +1,8 @@
+<div .page>
+    <h1>Ajouter un nouveau produit à la catégorie « #{categoryName cat} »
+
+    <form method=post action=@{AdminNewProdR catId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input type=submit value="Ajouter le produit">

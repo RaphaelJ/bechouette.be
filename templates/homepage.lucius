@@ -16,7 +16,10 @@
         color: white;
         text-shadow: 0 0 4px black;
         text-align: center;
-        font-family: 'Strait', cursive;
+        font-family: 'Fenix', serif;
+
+        transition-property: all;
+        transition-duration: 0.2s;
     }
     .previous:hover, .next:hover {
         background-color: rgba(255, 255, 255, 0.4);
@@ -45,17 +48,28 @@
         li {
             display: none;
 
-            .title {
+            .info {
                 position: absolute;
                 left: 0;
                 bottom: 0;
                 width: 100%;
-                min-height: 70px;
                 background-color: rgba(0, 0, 0, 0.5);
 
                 color: white;
-                font: normal normal 700 20px/44px 'Strait', cursive;
                 text-align: right;
+                text-shadow: 0 1px 2px black;
+
+                h2 {
+                    margin: 10px 15px;
+
+                    font-family: 'Strait', cursive;
+                }
+
+                .description {
+                    display: block;
+                    margin: 3px 15px 15px 15px;
+                    text-shadow: 0 1px 2px black;
+                }
             }
         }
 

@@ -1,0 +1,11 @@
+<div .page>
+    <h1>Connexion à l'administration
+
+    $maybe msg <- err
+        <p>
+            <strong>#{msg}
+
+    <form method=post action=@{AdminLoginR} enctype=#{enctype}>
+        ^{widget}
+
+        <input type=submit value=Connexion>

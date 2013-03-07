@@ -2,16 +2,30 @@
     <ul>
         <li >
             <img src=@{StaticR pictures_1_jpg} alt="Mise en avant"/>
-            <div .title>
-                Cahier de cours personnel
+            <div .info>
+                <h2>
+                    Cahier de cours personnel
+                <span .description>
+                    Modèle inspiré par un couturier italien que j'affectionne particulièrement.
+
         <li .enabled>
             <img src=@{StaticR pictures_2_jpg} alt="Mise en avant"/>
-            <div .title>
-                Cahier de cours personnel
+            <div .info>
+                <h2>
+                    Cahier personalisé
+                <span .description>
+                    Modèle inspiré par un couturier italien que j'affectionne particulièrement.
 
     <a href=# .previous>
         &lt;
     <a href=# .next>
         &gt;
 
-<h1>Collection
+<div .page>
+    <h1>Créations
+
+    $forall (Entity _ cat, prods) <- cats
+        <h2>#{categoryName cat}
+
+        $forall Entity _ prod <- prods
+            #{productName prod}

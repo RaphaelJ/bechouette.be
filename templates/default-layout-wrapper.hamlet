@@ -17,6 +17,8 @@ $newline never
         <link href=@{StaticR img_favicon_png} rel=icon type=image/png>
         <link href=http://fonts.googleapis.com/css?family=Strait
               rel=stylesheet type=text/css>
+        <link href=http://fonts.googleapis.com/css?family=Fenix
+              rel=stylesheet type=text/css>
 
         \<!--[if lt IE 9]>
         \<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -30,13 +32,16 @@ $newline never
                 <ul>
                     <li .enabled>
                         <a href=@{HomeR}>
-                            Collection
+                            Créations
                     <li>
                         <a href=@{HomeR}>
                             Passer commande
                     <li>
                         <a href=@{HomeR}>
                             A propos de Be Chouette
+
+                <div #info>
+                    Créations home-made de vêtements et articles pour petits et grands enfants
 
             <div id="main" role="main">
               ^{pageBody pc}

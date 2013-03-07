@@ -1,10 +1,15 @@
-Product
+Category
     name Text
-    description Text
+    UniqueCategoryName name
+
+Product
+    category CategoryId
+    name Text
+    shortDesc Text
+    desc Text
     details Text
-    price Double Maybe
+    price Double
     topProduct Bool
 
 Picture
     product ProductId
-    

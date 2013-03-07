@@ -1,0 +1,24 @@
+<div .page>
+    <h1>Photos du produit « #{productName prod} »
+
+    <h2>Ajouter une nouvelle photo
+
+    <p>
+        La première photo ajoutée sera utilisée pour illustrer le catalogue.
+
+    $maybe msg <- err
+        <p>
+            <strong>#{msg}
+
+    <form method=post action=@{AdminPicturesR prodId} enctype=#{enctype}>
+        ^{widget}
+
+        <input type=submit value=Ajouter la photo>
+
+    <h2>Photos
+
+    $forall (Entity picId pic) <- pics
+        <div>
+            <img src="static/pictures/1.png" alt="Photo" />
+            <a >
+                Supprimer cette photo

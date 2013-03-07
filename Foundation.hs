@@ -11,8 +11,8 @@ import Settings.Development (development)
 import qualified Database.Persist.Store
 import Settings.StaticFiles
 import Database.Persist.GenericSql
-import Settings (widgetFile, Extra (..))
 import Model
+import Settings (widgetFile, Extra (..))
 import Text.Jasmine (minifym)
 import Web.ClientSession (getKey)
 import Text.Hamlet (hamletFile)

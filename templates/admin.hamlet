@@ -1,0 +1,36 @@
+<div .page>
+    <h1>Administration des produits
+
+    <h2>Ajouter une nouvelle catégorie
+
+    $maybe msg <- err
+        <p>
+            <strong>#{msg}
+
+    <form method=post action=@{AdminR} enctype=#{enctype}>
+        ^{widget}
+
+        <input type=submit value="Ajouter la catégorie">
+
+    <h2>Catégories existantes
+
+    $forall (Entity catId cat, prods) <- cats
+        <h3>#{categoryName cat}
+
+        <a href=@{AdminNewProdR catId}>
+            Ajouter un produit dans cette catégorie
+        •
+        <a href=@{AdminRemoveCatR catId}
+           onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">
+            Supprimer cette catégorie et ses produits
+
+        $forall Entity prodId prod <- prods
+            <p>
+                <strong>#{productName prod}
+
+                <a href=@{AdminPicturesR prodId}>
+                    Gérer les photos de ce produit
+                •
+                <a href=@{AdminRemoveProdR prodId}
+                   onclick="return confirm('Etes-vous certain de vouloir supprimer le produit');">
+                    Supprimer ce produit

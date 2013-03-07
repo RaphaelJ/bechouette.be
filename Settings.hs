@@ -17,6 +17,7 @@ import Control.Applicative
 import Settings.Development
 import Data.Default (def)
 import Text.Hamlet
+import System.FilePath ((</>))
 
 -- | Which Persistent backend this site is using.
 type PersistConfig = SqliteConf
@@ -25,8 +26,10 @@ type PersistConfig = SqliteConf
 
 -- | The location of static files on your system. This is a file system
 -- path. The default value works properly with your scaffolded site.
-staticDir :: FilePath
+staticDir, pictureDir :: FilePath
 staticDir = "static"
+
+pictureDir = staticDir </> "pictures"
 
 -- | The base URL for your static files. As you can see by the default
 -- value, this can simply be "static" appended to your application root.
@@ -66,8 +69,9 @@ widgetFile = (if development then widgetFileReload
               widgetFileSettings
 
 data Extra = Extra
-    { 
+    { extraPassword :: Text
     } deriving Show
 
 parseExtra :: DefaultEnv -> Object -> Parser Extra
-parseExtra _ o = return Extra
+parseExtra _ o = Extra
+    <$> o .:  "password"
