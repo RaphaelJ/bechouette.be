@@ -3,9 +3,6 @@ module Foundation where
 import Prelude
 import Yesod
 import Yesod.Static
-import Yesod.Auth
-import Yesod.Auth.BrowserId
-import Yesod.Auth.GoogleEmail
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Conduit (Manager)
@@ -34,8 +31,7 @@ data App = App
     , appLogger :: Logger
     }
 
--- Set up i18n messages. See the message folder.
-mkMessage "App" "messages" "en"
+data Page = Collection
 
 -- This is where we define all of the routes in our application. For a full
 -- explanation of the syntax, please see:
@@ -85,7 +81,6 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             $(widgetFile "normalize")
-            addStylesheet $ StaticR css_bootstrap_css
             $(widgetFile "default-layout")
         hamletToRepHtml $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -96,7 +91,7 @@ instance Yesod App where
     urlRenderOverride _ _ = Nothing
 
     -- The page to be redirected to when authentication is required.
-    authRoute _ = Just $ AuthR LoginR
+    authRoute _ = Nothing
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
@@ -129,26 +124,6 @@ instance YesodPersist App where
             (persistConfig master)
             f
             (connPool master)
-
-instance YesodAuth App where
-    type AuthId App = UserId
-
-    -- Where to send a user after successful login
-    loginDest _ = HomeR
-    -- Where to send a user after logout
-    logoutDest _ = HomeR
-
-    getAuthId creds = runDB $ do
-        x <- getBy $ UniqueUser $ credsIdent creds
-        case x of
-            Just (Entity uid _) -> return $ Just uid
-            Nothing -> do
-                fmap Just $ insert $ User (credsIdent creds) Nothing
-
-    -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId, authGoogleEmail]
-
-    authHttpManager = httpManager
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

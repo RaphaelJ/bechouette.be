@@ -1,0 +1,76 @@
+body {
+    /*background-image: url('@{StaticR img_pattern_png}');*/
+    background-color: #DFDCDA;
+}
+
+.container {
+    width: 950px;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+
+    font-family: "Arial", sans-serif;
+    color: #897d76;
+
+    a {
+        color: #897d76;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    header {
+        position: relative;
+
+        font-size: 16px;
+        height: 120px;
+
+        img {
+            padding: 10px;
+        }
+
+        ul, li {
+            display: inline;
+        }
+
+        ul {
+            position: absolute;
+            margin: 0;
+            top: 3px;
+            left: 210px;
+        }
+
+        li {
+            margin: 0 10px;
+            padding: 5px 10px;
+            line-height: 30px;
+
+            a:hover {
+                text-decoration: none;
+            }
+        }
+
+        li:hover, li:active, li.enabled {
+            border-top: 4px solid #ee1980;
+        }
+    }
+
+    #main {
+        border-bottom: 2px solid #897d76;
+    }
+
+    footer {
+        padding: 5px;
+        background-color: #DADADA;
+
+        font-size: 13px;
+        line-height: 20px;
+        text-align: right;
+        
+        .facebook {
+            color: #3B5998;
+        }
+    }
+}

@@ -1,11 +1,10 @@
-User
-    ident Text
-    password Text Maybe
-    UniqueUser ident
-Email
-    email Text
-    user UserId Maybe
-    verkey Text Maybe
-    UniqueEmail email
+Product
+    name Text
+    description Text
+    details Text
+    price Double Maybe
+    topProduct Bool
 
- -- By default this file is used in Model.hs (which is imported by Foundation.hs)
+Picture
+    product ProductId
+    
