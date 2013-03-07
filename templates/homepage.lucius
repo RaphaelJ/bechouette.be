@@ -13,10 +13,10 @@
 
         line-height: 300px;
         font-size: 50px;
-        font-family: "Comic Sans MS";
         color: white;
         text-shadow: 0 0 4px black;
         text-align: center;
+        font-family: 'Strait', cursive;
     }
     .previous:hover, .next:hover {
         background-color: rgba(255, 255, 255, 0.4);
@@ -54,7 +54,7 @@
                 background-color: rgba(0, 0, 0, 0.5);
 
                 color: white;
-                font: normal normal 700 20px/44px Arial;
+                font: normal normal 700 20px/44px 'Strait', cursive;
                 text-align: right;
             }
         }
