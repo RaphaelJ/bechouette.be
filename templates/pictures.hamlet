@@ -1,6 +1,8 @@
 <div .page>
     <h1>Photos du produit « #{productName prod} »
 
+    <a href=@{AdminR}>Retour à l'administration
+
     <h2>Ajouter une nouvelle photo
 
     <p>
@@ -17,8 +19,8 @@
 
     <h2>Photos
 
-    $forall (Entity picId pic) <- pics
+    $forall (Entity picId _) <- pics
         <div>
-            <img src="static/pictures/1.png" alt="Photo" />
+            <img src="@{routePicture picId PicSmall}" alt="Photo" />
             <a >
                 Supprimer cette photo

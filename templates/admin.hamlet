@@ -28,6 +28,9 @@
             <p>
                 <strong>#{productName prod}
 
+                <a href=@{AdminEditProdR prodId}>
+                    Modifier ce produit
+                •
                 <a href=@{AdminPicturesR prodId}>
                     Gérer les photos de ce produit
                 •

@@ -1,6 +1,8 @@
 <div .page>
     <h1>Ajouter un nouveau produit à la catégorie « #{categoryName cat} »
 
+    <a href=@{AdminR}>Retour à l'administration
+
     <form method=post action=@{AdminNewProdR catId} enctype=#{enctype}>
         <table>
             ^{widget}

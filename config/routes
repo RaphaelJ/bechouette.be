@@ -5,7 +5,11 @@
 
 /admin                          AdminR                  GET POST
 /admin/login                    AdminLoginR             GET POST
+
 /admin/removecat/#CategoryId    AdminRemoveCatR         GET
+
 /admin/newprod/#CategoryId      AdminNewProdR           GET POST
+/admin/editprod/#ProductId      AdminEditProdR          GET POST
 /admin/removeprod/#ProductId    AdminRemoveProdR        GET
+
 /admin/pictures/#ProductId      AdminPicturesR          GET POST

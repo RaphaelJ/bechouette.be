@@ -1,0 +1,10 @@
+<div .page>
+    <h1>Modification du produit « #{productName prod} »
+
+    <a href=@{AdminR}>Retour à l'administration
+
+    <form method=post action=@{AdminEditProdR prodId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input type=submit value="Modifier le produit">

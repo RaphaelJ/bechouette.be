@@ -16,12 +16,17 @@ body {
     }
 
     a {
-        color: #897d76;
+        color: #9F1055;
         text-decoration: none;
     }
 
     a:hover {
         text-decoration: underline;
+    }
+
+    textarea {
+        min-width: 350px;
+        min-height: 150px;
     }
 
     header {
@@ -52,6 +57,10 @@ body {
             padding: 5px 10px;
 
             line-height: 30px;
+
+            a {
+                color: #897d76;
+            }
 
             a:hover {
                 text-decoration: none;

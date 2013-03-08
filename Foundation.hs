@@ -1,6 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 module Foundation where
 
 import Prelude
+import Data.Text (Text)
 import Yesod
 import Yesod.Static
 import Yesod.Default.Config
@@ -16,6 +18,7 @@ import Settings (widgetFile, Extra (..))
 import Text.Jasmine (minifym)
 import Web.ClientSession (getKey)
 import Text.Hamlet (hamletFile)
+import Text.Printf
 import System.Log.FastLogger (Logger)
 
 -- | The site argument for your application. This can be a good place to
@@ -133,6 +136,30 @@ instance RenderMessage App FormMessage where
 -- | Get the 'Extra' value, used to hold data from the settings.yml file.
 getExtra :: Handler Extra
 getExtra = fmap (appExtra . settings) getYesod
+
+data PicType = PicOriginal
+             | PicSmall -- 100x100
+             | PicLarge -- 300x400
+             | PicWide -- 950x300
+             | PicCatalogue -- 300x95
+
+routePicture :: PictureId -> PicType -> Route App
+routePicture picId picType =
+    StaticR $ StaticRoute ["pictures", pack $ picName picId picType] []
+
+pathPicture :: PictureId -> PicType -> FilePath
+pathPicture picId picType = Settings.pictureDir </> picName picId picType
+
+picName :: PictureId -> PicType -> String
+picName picId picType =
+    printf "%s%s.png" (show picId) picSuffix
+  where
+    picSuffix = case picType of
+        PicOriginal  -> "" :: String
+        PicSmall     -> "_small"
+        PicLarge     -> "_large"
+        PicWide      -> "_wide"
+        PicCatalogue -> "_catalogue"
 
 -- Note: previous versions of the scaffolding included a deliver function to
 -- send emails. Unfortunately, there are too many different options for us to
