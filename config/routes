@@ -3,6 +3,8 @@
 
 /                               HomeR                   GET
 
+/product/#ProductId             ProductR                GET
+
 /admin                          AdminR                  GET POST
 /admin/login                    AdminLoginR             GET POST
 
@@ -13,3 +15,4 @@
 /admin/removeprod/#ProductId    AdminRemoveProdR        GET
 
 /admin/pictures/#ProductId      AdminPicturesR          GET POST
+/admin/rempicture/#PictureId    AdminRemovePictureR     GET

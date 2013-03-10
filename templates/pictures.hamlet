@@ -19,8 +19,9 @@
 
     <h2>Photos
 
+    <ul>
     $forall (Entity picId _) <- pics
-        <div>
-            <img src="@{routePicture picId PicSmall}" alt="Photo" />
-            <a >
+        <li>
+            <img src="@{routePicture picId PicCatalogue}" alt="Photo" />
+            <a href=@{AdminRemovePictureR picId}>
                 Supprimer cette photo

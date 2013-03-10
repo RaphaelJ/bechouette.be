@@ -2,7 +2,7 @@
 module Foundation where
 
 import Prelude
-import Data.Text (Text)
+import Data.Text (pack)
 import Yesod
 import Yesod.Static
 import Yesod.Default.Config
@@ -10,6 +10,7 @@ import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Conduit (Manager)
 import qualified Settings
 import Settings.Development (development)
+import Database.Persist.Store (PersistValue (..))
 import qualified Database.Persist.Store
 import Settings.StaticFiles
 import Database.Persist.GenericSql
@@ -19,6 +20,7 @@ import Text.Jasmine (minifym)
 import Web.ClientSession (getKey)
 import Text.Hamlet (hamletFile)
 import Text.Printf
+import System.FilePath ((</>))
 import System.Log.FastLogger (Logger)
 
 -- | The site argument for your application. This can be a good place to
@@ -108,6 +110,9 @@ instance Yesod App where
             | development = "autogen-" ++ base64md5 lbs
             | otherwise   = base64md5 lbs
 
+    maximumContentLength _ (Just (AdminPicturesR _ )) = 20 * 1024 * 1024
+    maximumContentLength _ _                          = 2 * 1024 * 1024
+
     -- Place Javascript at bottom of the body tag so the rest of the page loads first
     jsLoader _ = BottomOfBody
 
@@ -147,11 +152,11 @@ routePicture :: PictureId -> PicType -> Route App
 routePicture picId picType =
     StaticR $ StaticRoute ["pictures", pack $ picName picId picType] []
 
-pathPicture :: PictureId -> PicType -> FilePath
-pathPicture picId picType = Settings.pictureDir </> picName picId picType
+picPath :: PictureId -> PicType -> FilePath
+picPath picId picType = Settings.pictureDir </> picName picId picType
 
 picName :: PictureId -> PicType -> String
-picName picId picType =
+picName ~(Key (PersistInt64 picId)) picType =
     printf "%s%s.png" (show picId) picSuffix
   where
     picSuffix = case picType of

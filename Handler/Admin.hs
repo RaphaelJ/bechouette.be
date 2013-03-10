@@ -1,13 +1,16 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 module Handler.Admin (
       getAdminR, postAdminR, getAdminLoginR, postAdminLoginR, getAdminRemoveCatR
     , getAdminNewProdR, postAdminNewProdR, getAdminEditProdR, postAdminEditProdR
     , getAdminRemoveProdR, getAdminPicturesR, postAdminPicturesR
+    , getAdminRemovePictureR
     ) where
 
 import Import
+import Control.Applicative
 import qualified Control.Exception as E
 import Control.Monad
+import Data.Ratio
 import System.Directory
 import qualified Vision.Image as I
 import qualified Vision.Primitive as I
@@ -162,19 +165,17 @@ getAdminRemoveProdR prodId = do
 prodForm :: CategoryId -> Maybe Product -> Form Product
 prodForm catId prod = renderTable $
     Product catId <$> areq textField "Nom du produit : " (productName <$> prod)
-                  <*> areq textField "Description rapide : " 
+                  <*> areq textField "Description rapide : "
                            (productShortDesc <$> prod)
-                  <*> (unTextarea <$>
-                        areq textareaField "Description complète : "
-                             (Textarea <$> productDesc <$> prod))
-                  <*> (unTextarea <$>
-                        areq textareaField "Détails (tailles, couleurs etc) : "
-                             (Textarea <$> productDetails <$> prod))
-                  <*> areq doubleField 
-                           "Prix ('.' pour séparer les décimales) : " 
+                  <*> areq textareaField "Description complète : "
+                           (productDesc <$> prod)
+                  <*> areq textareaField "Détails (tailles, couleurs, lavage, ...) : "
+                           (productDetails <$> prod)
+                  <*> aopt doubleField
+                           "Prix (facultatif, '.' pour séparer les décimales) : "
                            (productPrice <$> prod)
-                  <*> areq checkBoxField "Afficher à la une : " 
-                           (productTopProduct <$> prod)
+                  <*> areq checkBoxField "Afficher à la une : "
+                           (productTop <$> prod)
 
 -- | Supprime les produits et ses dépendances.
 removeProduct :: ProductId -> YesodDB sub App ()
@@ -183,7 +184,7 @@ removeProduct prodId = do
 
     pics <- selectList [PictureProduct ==. prodId] []
     forM_ pics $ \(Entity picId _) -> do
-        delete picId
+        removePicture picId
 
 -- -----------------------------------------------------------------------------
 
@@ -225,41 +226,61 @@ postAdminPicturesR prodId = do
     processImage info = do
         picId <- runDB $ insert (Picture prodId)
 
-        let path = pathPicture picId PicOriginal
-        fileMove info path
+        let path = picPath picId PicOriginal
+        liftIO $ fileMove info path
 
-        mImg <- liftIO $ C.try $ I.load path
+        mImg <- liftIO $ E.try $ (I.load path :: IO I.RGBImage)
         case mImg of
-            Just img -> do
-                resizeImage img PicSmall
-                resizeImage img PicLarge
-                resizeImage img PicWide
-                resizeImage img PicCatalogue
+            Right img -> do
+                resizeImage picId img PicSmall
+                resizeImage picId img PicLarge
+                resizeImage picId img PicWide
+                resizeImage picId img PicCatalogue
                 return Nothing
-            Nothing  -> do
-                removeFile path
+            Left (_ :: E.SomeException) -> do
+                liftIO $ removeFile path
                 runDB $ delete picId
                 return $ Just ("Image invalide." :: Text)
 
-    resizeImage img picType = do
+    resizeImage picId img picType = do
         let I.Size w h = I.getSize img
             I.Size w' h' = picSize picType
+            -- Redimensionne l'image sur la dimension la plus petite.
             ratio = min (w % w') (h % h')
-            (tmpW, tmpH) = (truncate $ w / ratio, truncate $ h / ratio)
-            tmp = I.resize I.LinearInterpol img (I.Size tmpW tmpH)
-            img' = I.crop tmp 
-        I.resize I.LinearInterpol $ I.crop img 
+            (tmpW, tmpH) =
+                (truncate ((w % 1) / ratio), truncate ((h % 1) / ratio))
+            tmp = I.resize I.Bilinear img (I.Size tmpW tmpH)
+            -- Coupe l'image sur la partie centrale.
+            rect = I.Rect ((tmpW - w') `div` 2) ((tmpH - h') `div` 2) w' h'
+            img' = I.crop tmp rect
+        liftIO $ I.save img' (picPath picId picType)
 
-    picSize PicSmall     = I.Size 100 100
+    picSize PicSmall     = I.Size 75 75
     picSize PicLarge     = I.Size 300 400
     picSize PicWide      = I.Size 950 300
     picSize PicCatalogue = I.Size 300 95
-
-postAdminPicturesR :: ProductId -> Handler RepHtml
-postAdminPicturesR = getAdminPicturesR
+    picSize PicOriginal  = undefined
 
 pictureForm :: Form FileInfo
 pictureForm = renderDivs $ fileAFormReq "Fichier de l'image : "
+
+getAdminRemovePictureR :: PictureId -> Handler ()
+getAdminRemovePictureR picId = do
+    redirectIfNotConnected
+
+    prodId <- runDB $ (pictureProduct <$> get404 picId) <* removePicture picId
+    redirect (AdminPicturesR prodId)
+
+removePicture :: PictureId -> YesodDB sub App ()
+removePicture picId = do
+    delete picId
+    removeFile' PicOriginal
+    removeFile' PicSmall
+    removeFile' PicLarge
+    removeFile' PicWide
+    removeFile' PicCatalogue
+  where
+    removeFile' = liftIO . removeFile . picPath picId
 
 -- -----------------------------------------------------------------------------
 

@@ -11,7 +11,7 @@ import Language.Haskell.TH.Syntax
 import Database.Persist.Sqlite (SqliteConf)
 import Yesod.Default.Config
 import Yesod.Default.Util
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Data.Yaml
 import Control.Applicative
 import Settings.Development

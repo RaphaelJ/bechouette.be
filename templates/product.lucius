@@ -1,0 +1,35 @@
+.pictures {
+    margin: 15px;
+    float: left;
+
+    .large_pic {
+        border: 1px solid #897d76;
+        box-shadow: 0 0 3px #897d76;
+    }
+
+    .mini_pics {
+        margin-top: 5px;
+
+        text-align: left;
+
+        img {
+            border: 1px solid #897d76;
+            margin: 2px;
+        }
+
+        img .enabled {
+            margin: 0px;
+            border: 3px solid #897d76;
+        }
+    }
+}
+
+.price {
+    font-family: 'Strait', cursive;
+    font-size: 1.4em;
+}
+
+.details {
+    font-family: 'Strait', cursive;
+    font-size: 0.9em;
+}

@@ -61,20 +61,70 @@
 
                 h2 {
                     margin: 10px 15px;
-
                     font-family: 'Strait', cursive;
+
                 }
 
                 .description {
                     display: block;
                     margin: 3px 15px 15px 15px;
-                    text-shadow: 0 1px 2px black;
                 }
             }
         }
 
         li.enabled {
             display: block;
+        }
+    }
+}
+
+ul.catalogue {
+    width: 100%;
+    padding: 0;
+    margin: 1px;
+
+    list-style-type: none;
+
+    li {
+        display: block;
+        float: left;
+        position: relative;
+        width: 300px;
+        height: 95px;
+        margin: 0 0 15px 6px;
+
+        .info {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+
+            color: white;
+            text-shadow: 0 1px 2px black;
+
+            h3 {
+                margin: 10px 15px;
+
+                font-family: 'Strait', cursive;
+            }
+
+            .description {
+                display: none;
+                margin: 3px 15px 15px 15px;
+            }
+        }
+    }
+
+    li:hover {
+        .info {
+            left: 0;
+            top: 0;
+            width: 300px;
+            height: 95px;
+
+            .description {
+                display: block;
+            }
         }
     }
 }

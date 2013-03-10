@@ -1,0 +1,45 @@
+<div .carrousel>
+    <ul>
+        $forall (i, (Entity prodId prod, mPicId)) <- topProds
+            $if i == 1
+                <li .enabled>
+                    <a href=@{ProductR prodId}>
+                        $maybe picId <- mPicId
+                            <img src=@{routePicture picId PicWide}
+                                alt="Mise en avant"/>
+                        <div .info>
+                            <h2>#{productName prod}
+                            <span .description>#{productShortDesc prod}
+            $else
+                <li>
+                    <a href=@{ProductR prodId}>
+                        $maybe picId <- mPicId
+                            <img src=@{routePicture picId PicWide}
+                                alt="Mise en avant"/>
+                        <div .info>
+                            <h2>#{productName prod}
+                            <span .description>#{productShortDesc prod}
+
+    <a href=# .previous>
+        &lt;
+    <a href=# .next>
+        &gt;
+
+<div .page>
+    <h1>Créations
+
+    $forall (Entity _ cat, prods) <- cats
+        <h2>#{categoryName cat}
+
+        <ul .catalogue>
+            $forall (Entity prodId prod, mPicId) <- prods
+                <li>
+                    <a href=@{ProductR prodId}>
+                        $maybe picId <- mPicId
+                            <img src=@{routePicture picId PicCatalogue}
+                                 alt="Produit catalogue"/>
+                        <div .info>
+                            <h3>#{productName prod}
+                            <span .description>#{productShortDesc prod}
+
+        <div .clear_float>

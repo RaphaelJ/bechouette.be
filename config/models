@@ -6,10 +6,10 @@ Product
     category CategoryId
     name Text
     shortDesc Text
-    desc Text
-    details Text
-    price Double
-    topProduct Bool
+    desc Textarea
+    details Textarea
+    price Double Maybe
+    top Bool
 
 Picture
     product ProductId

@@ -1,0 +1,23 @@
+<div .page>
+    $if null pics
+    $else
+     $with p <- head pics
+        <div .pictures>
+            <a href=@{routePicture p PicOriginal} target=_BLANK>
+                <img .large_pic src=@{routePicture p PicLarge}
+                     alt="Image du produit"/>
+            <div .mini_pics>
+                $forall p' <- pics
+                    <img src=@{routePicture p' PicSmall}
+                         alt="Miniature du produit"/>
+
+    <h1>#{productName prod}
+
+    $maybe price <- productPrice prod
+        <p .price>#{price} €
+
+    <p .description>#{productDesc prod}
+
+    <p .details>#{productDetails prod}
+
+    <div .clear_float>

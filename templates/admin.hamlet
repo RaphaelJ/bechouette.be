@@ -21,19 +21,21 @@
             Ajouter un produit dans cette catégorie
         •
         <a href=@{AdminRemoveCatR catId}
-           onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">
+        onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">
             Supprimer cette catégorie et ses produits
 
-        $forall Entity prodId prod <- prods
-            <p>
-                <strong>#{productName prod}
+        <ul>
+            $forall (Entity prodId prod, _) <- prods
+                <li>
+                    <p>
+                        <strong>#{productName prod}
 
-                <a href=@{AdminEditProdR prodId}>
-                    Modifier ce produit
-                •
-                <a href=@{AdminPicturesR prodId}>
-                    Gérer les photos de ce produit
-                •
-                <a href=@{AdminRemoveProdR prodId}
-                   onclick="return confirm('Etes-vous certain de vouloir supprimer le produit');">
-                    Supprimer ce produit
+                    <a href=@{AdminEditProdR prodId}>
+                        Modifier ce produit
+                    •
+                    <a href=@{AdminPicturesR prodId}>
+                        Gérer les photos de ce produit
+                    •
+                    <a href=@{AdminRemoveProdR prodId}
+                       onclick="return confirm('Etes-vous certain de vouloir supprimer le produit');">
+                        Supprimer ce produit
