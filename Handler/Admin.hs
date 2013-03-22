@@ -7,11 +7,13 @@ module Handler.Admin (
     ) where
 
 import Import
-import Control.Applicative
+import Prelude (tail)
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Ratio
+import qualified Data.Text as T
 import System.Directory
+import System.FilePath (takeExtension)
 import qualified Vision.Image as I
 import qualified Vision.Primitive as I
 
@@ -183,8 +185,8 @@ removeProduct prodId = do
     delete prodId
 
     pics <- selectList [PictureProduct ==. prodId] []
-    forM_ pics $ \(Entity picId _) -> do
-        removePicture picId
+    forM_ pics $ \(Entity picId pic) -> do
+        removePicture picId (pictureExtension pic)
 
 -- -----------------------------------------------------------------------------
 
@@ -224,25 +226,26 @@ postAdminPicturesR prodId = do
         $(widgetFile "pictures")
   where
     processImage info = do
-        picId <- runDB $ insert (Picture prodId)
+        let picExt = T.pack $ tail $ takeExtension $ T.unpack $ fileName info
+        picId <- runDB $ insert (Picture prodId picExt)
 
-        let path = picPath picId PicOriginal
+        let path = picPath picId PicOriginal picExt
         liftIO $ fileMove info path
 
         mImg <- liftIO $ E.try $ (I.load path :: IO I.RGBImage)
         case mImg of
             Right img -> do
-                resizeImage picId img PicSmall
-                resizeImage picId img PicLarge
-                resizeImage picId img PicWide
-                resizeImage picId img PicCatalogue
+                resizeImage picId img PicCatalogue picExt
+                resizeImage picId img PicSmall     picExt
+                resizeImage picId img PicLarge     picExt
+                resizeImage picId img PicWide      picExt
                 return Nothing
             Left (_ :: E.SomeException) -> do
                 liftIO $ removeFile path
                 runDB $ delete picId
                 return $ Just ("Image invalide." :: Text)
 
-    resizeImage picId img picType = do
+    resizeImage picId img picType picExt = do
         let I.Size w h = I.getSize img
             I.Size w' h' = picSize picType
             -- Redimensionne l'image sur la dimension la plus petite.
@@ -253,10 +256,10 @@ postAdminPicturesR prodId = do
             -- Coupe l'image sur la partie centrale.
             rect = I.Rect ((tmpW - w') `div` 2) ((tmpH - h') `div` 2) w' h'
             img' = I.crop tmp rect
-        liftIO $ I.save img' (picPath picId picType)
+        liftIO $ I.save img' (picPath picId picType picExt)
 
     picSize PicSmall     = I.Size 75 75
-    picSize PicLarge     = I.Size 300 400
+    picSize PicLarge     = I.Size 350 400
     picSize PicWide      = I.Size 950 300
     picSize PicCatalogue = I.Size 300 95
     picSize PicOriginal  = undefined
@@ -268,11 +271,15 @@ getAdminRemovePictureR :: PictureId -> Handler ()
 getAdminRemovePictureR picId = do
     redirectIfNotConnected
 
-    prodId <- runDB $ (pictureProduct <$> get404 picId) <* removePicture picId
+    prodId <- runDB $ do
+        pic <- get404 picId
+        removePicture picId (pictureExtension pic)
+        return $ pictureProduct pic
+
     redirect (AdminPicturesR prodId)
 
-removePicture :: PictureId -> YesodDB sub App ()
-removePicture picId = do
+removePicture :: PictureId -> Text -> YesodDB sub App ()
+removePicture picId picExt = do
     delete picId
     removeFile' PicOriginal
     removeFile' PicSmall
@@ -280,7 +287,7 @@ removePicture picId = do
     removeFile' PicWide
     removeFile' PicCatalogue
   where
-    removeFile' = liftIO . removeFile . picPath picId
+    removeFile' picType = liftIO $ removeFile $ picPath picId picType picExt
 
 -- -----------------------------------------------------------------------------
 

@@ -1,0 +1,35 @@
+var carrouselActive = 0;
+var carrouselTimeout = 4000;
+var carrouselTimeoutEnabled = true;
+
+function carrouselNavigate(offset)
+{
+    var items = $("#carrousel").children();
+
+    items.eq(carrouselActive).fadeOut();
+
+    var n = items.length;
+    carrouselActive = (carrouselActive + offset) % n;
+    if (carrouselActive < 0)
+        carrouselActive += n;
+
+    items.eq(carrouselActive).fadeIn();
+}
+
+function carrouselNavigateUser(offset)
+{
+    carrouselTimeoutEnabled = false;
+    carrouselNavigate(offset);
+}
+
+function carrouselNavigateTimeout()
+{
+    if (carrouselTimeoutEnabled) {
+        carrouselNavigate(+1);
+        setTimeout(carrouselNavigateTimeout, carrouselTimeout);
+    }
+}
+setTimeout(carrouselNavigateTimeout, carrouselTimeout);
+
+$("#carrousel_previous").click(function () { carrouselNavigateUser(-1); });
+$("#carrousel_next").click(function () { carrouselNavigateUser(+1); });

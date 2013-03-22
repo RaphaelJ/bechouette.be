@@ -15,26 +15,24 @@ getHomeR = do
         setTitle "Créations - Be Chouette"
         $(widgetFile "home")
 
-listTopProds :: YesodDB sub App [(Entity Product, Maybe PictureId)]
+listTopProds :: YesodDB sub App [(Entity Product, Maybe (Entity Picture))]
 listTopProds = do
     prods <- selectList [ProductTop ==. True] [Asc ProductName]
     forM prods $ \prod@(Entity prodId _) -> do
-        mPicId <- getPic prodId
-        return (prod, mPicId)
+        mPic <- getPic prodId
+        return (prod, mPic)
 
 listProducts :: YesodDB sub App [
-      (Entity Category, [(Entity Product, Maybe PictureId)])
+      (Entity Category, [(Entity Product, Maybe (Entity Picture))])
     ]
 listProducts = do
     cats <- selectList [] [Asc CategoryName]
     forM cats $ \cat@(Entity catId _) -> do
         prods <- selectList [ProductCategory ==. catId] [Asc ProductName]
         prodsPics <- forM prods $ \prod@(Entity prodId _) -> do
-            mPicId <- getPic prodId
-            return (prod, mPicId)
+            mPic <- getPic prodId
+            return (prod, mPic)
         return (cat, prodsPics)
 
-getPic :: ProductId -> YesodDB sub App (Maybe PictureId)
-getPic prodId =
-    selectFirst [PictureProduct ==. prodId] [Asc PictureId] >>=
-    return . (entityKey <$>)
+getPic :: ProductId -> YesodDB sub App (Maybe (Entity Picture))
+getPic prodId = selectFirst [PictureProduct ==. prodId] [Asc PictureId]

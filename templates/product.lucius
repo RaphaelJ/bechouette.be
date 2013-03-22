@@ -1,16 +1,17 @@
 .pictures {
     margin: 15px;
     float: left;
+    width: 350px;
 
     .large_pic {
         border: 1px solid #897d76;
-        box-shadow: 0 0 3px #897d76;
+        box-shadow: 0 0 2px #897d76;
     }
 
     .mini_pics {
         margin-top: 5px;
 
-        text-align: left;
+        text-align: center;
 
         img {
             border: 1px solid #897d76;
@@ -20,6 +21,10 @@
         img .enabled {
             margin: 0px;
             border: 3px solid #897d76;
+        }
+
+        img:hover {
+            cursor: pointer;
         }
     }
 }

@@ -7,10 +7,9 @@ import Text.Hamlet (shamlet)
 
 getProductR :: ProductId -> Handler RepHtml
 getProductR prodId = do
-    (prod, pics) <- runDB $ (,) <$> get404 prodId 
-                                <*> (map entityKey <$>
-                                         selectList [PictureProduct ==. prodId]
-                                                    [Asc PictureId])
+    (prod, pics) <- runDB $ (,) <$> get404 prodId
+                                <*> (selectList [PictureProduct ==. prodId]
+                                                [Asc PictureId])
 
     defaultLayout $ do
         setTitle [shamlet|#{productName prod} - Be Chouette|]

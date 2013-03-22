@@ -1,15 +1,21 @@
 <div .page>
     $if null pics
     $else
-     $with p <- head pics
         <div .pictures>
-            <a href=@{routePicture p PicOriginal} target=_BLANK>
-                <img .large_pic src=@{routePicture p PicLarge}
-                     alt="Image du produit"/>
+            $with Entity picId pic <- head pics
+             $with picExt <- pictureExtension pic
+                <a #large_pic_link href=@{routePicture picId PicOriginal picExt}
+                   target=_BLANK>
+                    <img .large_pic #large_pic
+                         src=@{routePicture picId PicLarge picExt}
+                         alt="Image du produit" title="Image du produit"/>
+
             <div .mini_pics>
-                $forall p' <- pics
-                    <img src=@{routePicture p' PicSmall}
-                         alt="Miniature du produit"/>
+                $forall Entity picId pic <- pics
+                 $with picExt <- pictureExtension pic
+                    <img src=@{routePicture picId PicSmall picExt}
+                         alt="Miniature du produit"
+                         onclick="selectPicture('@{routePicture picId PicLarge picExt}', '@{routePicture picId PicOriginal picExt}')"/>
 
     <h1>#{productName prod}
 

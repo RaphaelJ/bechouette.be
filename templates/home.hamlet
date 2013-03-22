@@ -1,28 +1,30 @@
 <div .carrousel>
-    <ul>
-        $forall (i, (Entity prodId prod, mPicId)) <- topProds
+    <ul #carrousel>
+        $forall (i, (Entity prodId prod, mPic)) <- topProds
             $if i == 1
-                <li .enabled>
+                <li>
                     <a href=@{ProductR prodId}>
-                        $maybe picId <- mPicId
-                            <img src=@{routePicture picId PicWide}
+                        $maybe Entity picId pic <- mPic
+                         $with picExt <- pictureExtension pic
+                            <img src=@{routePicture picId PicWide picExt}
                                 alt="Mise en avant"/>
                         <div .info>
                             <h2>#{productName prod}
                             <span .description>#{productShortDesc prod}
             $else
-                <li>
+                <li style="display: none">
                     <a href=@{ProductR prodId}>
-                        $maybe picId <- mPicId
-                            <img src=@{routePicture picId PicWide}
+                        $maybe Entity picId pic <- mPic
+                         $with picExt <- pictureExtension pic
+                            <img src=@{routePicture picId PicWide picExt}
                                 alt="Mise en avant"/>
                         <div .info>
                             <h2>#{productName prod}
                             <span .description>#{productShortDesc prod}
 
-    <a href=# .previous>
+    <a href=# .previous #carrousel_previous>
         &lt;
-    <a href=# .next>
+    <a href=# .next #carrousel_next>
         &gt;
 
 <div .page>
@@ -32,11 +34,12 @@
         <h2>#{categoryName cat}
 
         <ul .catalogue>
-            $forall (Entity prodId prod, mPicId) <- prods
+            $forall (Entity prodId prod, mPic) <- prods
                 <li>
                     <a href=@{ProductR prodId}>
-                        $maybe picId <- mPicId
-                            <img src=@{routePicture picId PicCatalogue}
+                        $maybe Entity picId pic <- mPic
+                         $with picExt <- pictureExtension pic
+                            <img src=@{routePicture picId PicCatalogue picExt}
                                  alt="Produit catalogue"/>
                         <div .info>
                             <h3>#{productName prod}

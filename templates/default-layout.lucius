@@ -1,10 +1,10 @@
 body {
-    background-color: #DFDCDA;
+    background-color: #F6F3EF;
 }
 
 .container {
     width: 950px;
-    margin: 15px auto;
+    margin: 10px auto;
     background-color: white;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 

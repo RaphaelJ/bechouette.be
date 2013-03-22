@@ -1,0 +1,5 @@
+function selectPicture(largeUrl, originalUrl)
+{
+    $("#large_pic").attr("src", largeUrl);
+    $("#large_pic_link").attr("href", originalUrl);
+}

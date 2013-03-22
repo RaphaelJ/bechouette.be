@@ -13,3 +13,4 @@ Product
 
 Picture
     product ProductId
+    extension Text

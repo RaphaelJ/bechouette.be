@@ -2,7 +2,7 @@
 module Foundation where
 
 import Prelude
-import Data.Text (pack)
+import Data.Text (Text, pack, unpack)
 import Yesod
 import Yesod.Static
 import Yesod.Default.Config
@@ -87,6 +87,7 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             $(widgetFile "normalize")
             $(widgetFile "default-layout")
+            addScriptRemote "http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"
         hamletToRepHtml $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- This is done to provide an optimization for serving static files from
@@ -144,20 +145,21 @@ getExtra = fmap (appExtra . settings) getYesod
 
 data PicType = PicOriginal
              | PicSmall -- 100x100
-             | PicLarge -- 300x400
+             | PicLarge -- 350x400
              | PicWide -- 950x300
              | PicCatalogue -- 300x95
 
-routePicture :: PictureId -> PicType -> Route App
-routePicture picId picType =
-    StaticR $ StaticRoute ["pictures", pack $ picName picId picType] []
+routePicture :: PictureId -> PicType -> Text -> Route App
+routePicture picId picType picExt =
+    StaticR $ StaticRoute ["pictures", pack $ picName picId picType picExt] []
 
-picPath :: PictureId -> PicType -> FilePath
-picPath picId picType = Settings.pictureDir </> picName picId picType
+picPath :: PictureId -> PicType -> Text -> FilePath
+picPath picId picType picExt =
+    Settings.pictureDir </> picName picId picType picExt
 
-picName :: PictureId -> PicType -> String
-picName ~(Key (PersistInt64 picId)) picType =
-    printf "%s%s.png" (show picId) picSuffix
+picName :: PictureId -> PicType -> Text -> String
+picName ~(Key (PersistInt64 picId)) picType picExt =
+    printf "%s%s.%s" (show picId) picSuffix (unpack picExt)
   where
     picSuffix = case picType of
         PicOriginal  -> "" :: String
