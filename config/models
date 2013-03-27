@@ -1,9 +1,11 @@
 Category
     name Text
+    archived Bool
     UniqueCategoryName name
 
 Product
     category CategoryId
+    ref Text
     name Text
     shortDesc Text
     desc Textarea
