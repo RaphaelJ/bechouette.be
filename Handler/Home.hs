@@ -26,7 +26,7 @@ listProducts :: YesodDB sub App [
       (Entity Category, [(Entity Product, Maybe (Entity Picture))])
     ]
 listProducts = do
-    cats <- selectList [] [Asc CategoryName]
+    cats <- selectList [] [Asc CategoryOrder, Asc CategoryName]
     forM cats $ \cat@(Entity catId _) -> do
         prods <- selectList [ProductCategory ==. catId] [Asc ProductName]
         prodsPics <- forM prods $ \prod@(Entity prodId _) -> do

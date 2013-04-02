@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 module Handler.Admin (
-      getAdminR, postAdminR, getAdminLoginR, postAdminLoginR, getAdminRemoveCatR
+      getAdminR, postAdminR, getAdminLoginR, postAdminLoginR
+    , getAdminEditCatR, postAdminEditCatR, getAdminRemoveCatR
     , getAdminNewProdR, postAdminNewProdR, getAdminEditProdR, postAdminEditProdR
     , getAdminRemoveProdR, getAdminPicturesR, postAdminPicturesR
     , getAdminRemovePictureR
@@ -26,7 +27,7 @@ getAdminR :: Handler RepHtml
 getAdminR = do
     redirectIfNotConnected
 
-    (widget, enctype) <- generateFormPost categoryForm
+    (widget, enctype) <- generateFormPost (categoryForm Nothing)
 
     cats <- runDB listProducts
 
@@ -40,14 +41,14 @@ postAdminR :: Handler RepHtml
 postAdminR = do
     redirectIfNotConnected
 
-    ((result, widget), enctype) <- runFormPost categoryForm
+    ((result, widget), enctype) <- runFormPost $ categoryForm Nothing
 
     err <- case result of
-        FormSuccess name -> do
-            m <- runDB $ insertUnique (Category name)
+        FormSuccess cat -> do
+            m <- runDB $ insertUnique cat
             case m of
-                Just _  -> return (Nothing :: Maybe Text)
-                Nothing -> return $! Just "Nom de catégorie existant."
+                Just _  -> redirect AdminR
+                Nothing -> return $! Just ("Nom de catégorie existant." :: Text)
         _ -> 
             return Nothing
 
@@ -56,6 +57,35 @@ postAdminR = do
     defaultLayout $ do
         setTitle "Administration - Be Chouette"
         $(widgetFile "admin")
+
+getAdminEditCatR :: CategoryId -> Handler RepHtml
+getAdminEditCatR catId = do
+    redirectIfNotConnected
+
+    cat <- runDB $ get404 catId
+
+    (widget, enctype) <- generateFormPost $ categoryForm (Just cat)
+
+    defaultLayout $ do
+        setTitle "Modifier une catégorie - Be Chouette"
+        $(widgetFile "editcat")
+
+postAdminEditCatR :: CategoryId -> Handler RepHtml
+postAdminEditCatR catId = do
+    redirectIfNotConnected
+
+    cat <- runDB $ get404 catId
+
+    ((result, widget), enctype) <- runFormPost $ categoryForm (Just cat)
+
+    case result of
+        FormSuccess newCat -> do
+            _ <- runDB $ replace catId newCat
+            redirect AdminR
+        _ -> do
+            defaultLayout $ do
+                setTitle "Modifier une catégorie - Be Chouette"
+                $(widgetFile "editcat")
 
 getAdminRemoveCatR :: CategoryId -> Handler ()
 getAdminRemoveCatR catId = do
@@ -68,8 +98,11 @@ getAdminRemoveCatR catId = do
 
     redirect AdminR
 
-categoryForm :: Form Text
-categoryForm = renderDivs $ areq textField "Nom de la catégorie : " Nothing
+categoryForm :: Maybe Category -> Form Category
+categoryForm cat = renderTable $ Category
+    <$> areq textField "Nom de la catégorie : " (categoryName <$> cat)
+    <*> areq intField "Ordre de la catégorie (classées par ordre croissant) : "
+                      (categoryOrder <$> cat)
 
 -- -----------------------------------------------------------------------------
 
@@ -132,17 +165,21 @@ postAdminNewProdR catId = do
 
 getAdminEditProdR :: ProductId -> Handler RepHtml
 getAdminEditProdR prodId = do
+    redirectIfNotConnected
+
     prod <- runDB $ get404 prodId
     let catId = productCategory prod
 
     (widget, enctype) <- generateFormPost (prodForm catId (Just prod))
 
     defaultLayout $ do
-        setTitle "Modifier un  produit - Be Chouette"
+        setTitle "Modifier un produit - Be Chouette"
         $(widgetFile "editprod")
 
 postAdminEditProdR :: ProductId -> Handler RepHtml
 postAdminEditProdR prodId = do
+    redirectIfNotConnected
+
     prod <- runDB $ get404 prodId
     let catId = productCategory prod
 
@@ -154,7 +191,7 @@ postAdminEditProdR prodId = do
             redirect AdminR
         _ -> do
             defaultLayout $ do
-                setTitle "Modifier un  produit - Be Chouette"
+                setTitle "Modifier un produit - Be Chouette"
                 $(widgetFile "editprod")
 
 getAdminRemoveProdR :: ProductId -> Handler ()
@@ -167,6 +204,8 @@ getAdminRemoveProdR prodId = do
 prodForm :: CategoryId -> Maybe Product -> Form Product
 prodForm catId prod = renderTable $
     Product catId <$> areq textField "Nom du produit : " (productName <$> prod)
+                  <*> aopt textField "Référence du produit (facultatif) : "
+                           (productRef <$> prod)
                   <*> areq textField "Description rapide : "
                            (productShortDesc <$> prod)
                   <*> areq textareaField "Description complète : "
@@ -176,6 +215,8 @@ prodForm catId prod = renderTable $
                   <*> aopt doubleField
                            "Prix (facultatif, '.' pour séparer les décimales) : "
                            (productPrice <$> prod)
+                  <*> areq checkBoxField "Disponible à la vente : "
+                           (productAvailable <$> prod)
                   <*> areq checkBoxField "Afficher à la une : "
                            (productTop <$> prod)
 
@@ -239,7 +280,7 @@ postAdminPicturesR prodId = do
                 resizeImage picId img PicSmall     picExt
                 resizeImage picId img PicLarge     picExt
                 resizeImage picId img PicWide      picExt
-                return Nothing
+                redirect $ AdminPicturesR prodId
             Left (_ :: E.SomeException) -> do
                 liftIO $ removeFile path
                 runDB $ delete picId

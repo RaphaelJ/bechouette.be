@@ -8,17 +8,21 @@
             <strong>#{msg}
 
     <form method=post action=@{AdminR} enctype=#{enctype}>
-        ^{widget}
+        <table>
+            ^{widget}
 
         <input type=submit value="Ajouter la catégorie">
 
     <h2>Catégories existantes
 
     $forall (Entity catId cat, prods) <- cats
-        <h3>#{categoryName cat}
+        <h3>#{categoryName cat} (ordre : #{categoryOrder cat})
 
         <a href=@{AdminNewProdR catId}>
             Ajouter un produit dans cette catégorie
+        •
+        <a href=@{AdminEditCatR catId}>
+            Modifier cette catégorie
         •
         <a href=@{AdminRemoveCatR catId}
         onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">

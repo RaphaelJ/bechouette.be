@@ -1,14 +1,17 @@
 Category
     name Text
+    order Int
     UniqueCategoryName name
 
 Product
     category CategoryId
     name Text
+    ref Text Maybe
     shortDesc Text
     desc Textarea
     details Textarea
     price Double Maybe
+    available Bool
     top Bool
 
 Picture

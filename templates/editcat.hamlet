@@ -1,0 +1,10 @@
+<div .page>
+    <h1>Modification de la catégorie « #{categoryName cat} »
+
+    <a href=@{AdminR}>Retour à l'administration
+
+    <form method=post action=@{AdminEditCatR catId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input type=submit value="Modifier la catégorie">

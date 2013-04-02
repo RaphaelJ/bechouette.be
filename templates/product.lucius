@@ -30,8 +30,23 @@
 }
 
 .price {
+    float: right;
     font-family: 'Strait', cursive;
     font-size: 1.4em;
+}
+
+.ref {
+    margin: -15px 0 0 0;
+    font-size: 0.9em;
+}
+
+.share {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.description {
+    text-align: justify;
 }
 
 .details {
