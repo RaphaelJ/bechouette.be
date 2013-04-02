@@ -1,10 +1,7 @@
 Category
     name Text
-<<<<<<< HEAD
     order Int
-=======
     archived Bool
->>>>>>> 31421c079db65650701299a162e8aa52266e3910
     UniqueCategoryName name
 
 Product
