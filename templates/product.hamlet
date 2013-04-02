@@ -30,6 +30,12 @@
     <p .details>#{productDetails prod}
 
     <div .share>
+        <meta property="og:title" content="#{productName prod}" />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content="@{ProductR prodId}" />
+        <meta property="og:site_name" content="Be Chouette" />
+        <meta property="og:description"content="#{productShortDesc prod}" />
+
         <a href=https://www.facebook.com/sharer/sharer.php?u=@{ProductR prodId}>
             Partager sur Facebook
         &nbsp;•&nbsp;
@@ -39,6 +45,8 @@
         $else
          $with Entity picId pic <- head pics
           $with picExt <- pictureExtension pic
+            <meta property="og:image" content="@{routePicture picId PicLarge picExt}"/>
+
             <a href="//pinterest.com/pin/create/button/?url=@{ProductR prodId}&media=@{routePicture picId PicLarge picExt}&description=#{productName prod}">
                 Epingler sur Pinterest
 
