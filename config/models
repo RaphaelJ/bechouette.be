@@ -1,12 +1,10 @@
 Category
     name Text
     order Int
-    archived Bool
     UniqueCategoryName name
 
 Product
     category CategoryId
-    ref Text
     name Text
     ref Text Maybe
     shortDesc Text
