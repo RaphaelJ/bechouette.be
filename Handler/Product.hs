@@ -14,3 +14,15 @@ getProductR prodId = do
     defaultLayout $ do
         setTitle [shamlet|#{productName prod} - Be Chouette|]
         $(widgetFile "product")
+        toWidgetHead [hamlet|
+            <meta property="og:title" content="#{productName prod}" />
+            <meta property="og:type" content="article" />
+            <meta property="og:url" content="@{ProductR prodId}" />
+            <meta property="og:site_name" content="Be Chouette" />
+            <meta property="og:description"content="#{productShortDesc prod}" />
+            $if null pics
+            $else
+             $with Entity picId pic <- head pics
+              $with picExt <- pictureExtension pic
+                <meta property="og:image" content="@{routePicture picId PicLarge picExt}"/>
+            |]
