@@ -1,0 +1,6 @@
+form {
+    .required, .optional {
+        float: left;
+        min-width: 460px;
+    }
+}

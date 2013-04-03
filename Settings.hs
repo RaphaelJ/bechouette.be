@@ -69,9 +69,10 @@ widgetFile = (if development then widgetFileReload
               widgetFileSettings
 
 data Extra = Extra
-    { extraPassword :: Text
+    { extraEmail :: Text, extraPassword :: Text
     } deriving Show
 
 parseExtra :: DefaultEnv -> Object -> Parser Extra
 parseExtra _ o = Extra
-    <$> o .:  "password"
+    <$> o .: "email"
+    <*> o .: "password"

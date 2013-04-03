@@ -2,7 +2,7 @@
     <ul #carrousel>
         $forall (i, (Entity prodId prod, mPic)) <- topProds
             $if i == 1
-                <li>
+                <li .item>
                     <a href=@{ProductR prodId}>
                         $maybe Entity picId pic <- mPic
                          $with picExt <- pictureExtension pic
@@ -12,7 +12,7 @@
                             <h2>#{productName prod}
                             <span .description>#{productShortDesc prod}
             $else
-                <li style="display: none">
+                <li .item style="display: none">
                     <a href=@{ProductR prodId}>
                         $maybe Entity picId pic <- mPic
                          $with picExt <- pictureExtension pic

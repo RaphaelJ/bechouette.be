@@ -12,6 +12,7 @@ import Prelude (tail)
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Ratio
+import Database.Persist.GenericSql (rollback)
 import qualified Data.Text as T
 import System.Directory
 import System.FilePath (takeExtension)
@@ -99,9 +100,9 @@ getAdminRemoveCatR catId = do
     redirect AdminR
 
 categoryForm :: Maybe Category -> Form Category
-categoryForm cat = renderTable $ Category
-    <$> areq textField "Nom de la catégorie : " (categoryName <$> cat)
-    <*> areq intField "Ordre de la catégorie (classées par ordre croissant) : "
+categoryForm cat = renderDivs $ Category
+    <$> areq textField "Nom de la catégorie" (categoryName <$> cat)
+    <*> areq intField  "Ordre de la catégorie (classées par ordre croissant)"
                       (categoryOrder <$> cat)
 
 -- -----------------------------------------------------------------------------
@@ -131,7 +132,7 @@ postAdminLoginR = do
                 $(widgetFile "login")
 
 loginForm :: Form Text
-loginForm = renderDivs $ areq passwordField "Mot de passe : " Nothing
+loginForm = renderDivs $ areq passwordField "Mot de passe" Nothing
 
 -- -----------------------------------------------------------------------------
 
@@ -202,22 +203,22 @@ getAdminRemoveProdR prodId = do
     redirect AdminR
 
 prodForm :: CategoryId -> Maybe Product -> Form Product
-prodForm catId prod = renderTable $
-    Product catId <$> areq textField "Nom du produit : " (productName <$> prod)
-                  <*> aopt textField "Référence du produit (facultatif) : "
+prodForm catId prod = renderDivs $
+    Product catId <$> areq textField "Nom du produit" (productName <$> prod)
+                  <*> aopt textField "Référence du produit (facultatif)"
                            (productRef <$> prod)
-                  <*> areq textField "Description rapide : "
+                  <*> areq textField "Description rapide"
                            (productShortDesc <$> prod)
-                  <*> areq textareaField "Description complète : "
+                  <*> areq textareaField "Description complète"
                            (productDesc <$> prod)
-                  <*> areq textareaField "Détails (tailles, couleurs, lavage, ...) : "
+                  <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
                            (productDetails <$> prod)
                   <*> aopt doubleField
-                           "Prix (facultatif, '.' pour séparer les décimales) : "
+                           "Prix (facultatif, '.' pour séparer les décimales)"
                            (productPrice <$> prod)
-                  <*> areq checkBoxField "Disponible à la vente : "
+                  <*> areq checkBoxField "Disponible à la vente"
                            (productAvailable <$> prod)
-                  <*> areq checkBoxField "Afficher à la une : "
+                  <*> areq checkBoxField "Afficher à la une"
                            (productTop <$> prod)
 
 -- | Supprime les produits et ses dépendances.
@@ -268,23 +269,24 @@ postAdminPicturesR prodId = do
   where
     processImage info = do
         let picExt = T.pack $ tail $ takeExtension $ T.unpack $ fileName info
-        picId <- runDB $ insert (Picture prodId picExt)
+        runDB $ do
+            picId <- insert (Picture prodId picExt)
 
-        let path = picPath picId PicOriginal picExt
-        liftIO $ fileMove info path
+            let path = picPath picId PicOriginal picExt
+            liftIO $ fileMove info path
 
-        mImg <- liftIO $ E.try $ (I.load path :: IO I.RGBImage)
-        case mImg of
-            Right img -> do
-                resizeImage picId img PicCatalogue picExt
-                resizeImage picId img PicSmall     picExt
-                resizeImage picId img PicLarge     picExt
-                resizeImage picId img PicWide      picExt
-                redirect $ AdminPicturesR prodId
-            Left (_ :: E.SomeException) -> do
-                liftIO $ removeFile path
-                runDB $ delete picId
-                return $ Just ("Image invalide." :: Text)
+            mImg <- liftIO $ E.try $ (I.load path :: IO I.RGBImage)
+            case mImg of
+                Right img -> do
+                    resizeImage picId img PicCatalogue picExt
+                    resizeImage picId img PicSmall     picExt
+                    resizeImage picId img PicLarge     picExt
+                    resizeImage picId img PicWide      picExt
+                    return Nothing
+                Left (_ :: E.SomeException) -> do
+                    liftIO $ removeFile path
+                    rollback
+                    return $ Just ("Image invalide." :: Text)
 
     resizeImage picId img picType picExt = do
         let I.Size w h = I.getSize img
@@ -306,7 +308,7 @@ postAdminPicturesR prodId = do
     picSize PicOriginal  = undefined
 
 pictureForm :: Form FileInfo
-pictureForm = renderDivs $ fileAFormReq "Fichier de l'image : "
+pictureForm = renderDivs $ fileAFormReq "Fichier de l'image"
 
 getAdminRemovePictureR :: PictureId -> Handler ()
 getAdminRemovePictureR picId = do

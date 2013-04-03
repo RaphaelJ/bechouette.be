@@ -1,0 +1,16 @@
+.command_info {
+    padding: 10px 15px;
+    background-color: #E52575;
+    box-shadow: 2px 2px 0 #97305B;
+    border-radius: 3px;
+
+    color: white;
+    font-family: 'Strait', cursive;
+}
+
+form {
+    .required, .optional {
+        float: left;
+        min-width: 460px;
+    }
+}

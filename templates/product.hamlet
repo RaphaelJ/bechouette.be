@@ -29,18 +29,27 @@
 
     <p .details>#{productDetails prod}
 
+    $if productAvailable prod
+        <p .command>
+            <a .button href=@{CommandProductR prodId}>
+                Commander cette création
+    $else
+        <p .not_available>Cette création n'est plus disponible actuellement.
+
     <div .share>
-        <a href=https://www.facebook.com/sharer/sharer.php?u=@{ProductR prodId}>
+        <a href=https://www.facebook.com/sharer/sharer.php?u=@{ProductR prodId} 
+           target="_BLANK">
             Partager sur Facebook
         &nbsp;•&nbsp;
         $if null pics
-            <a href="//pinterest.com/pin/create/button/?url=@{ProductR prodId}&description=#{productName prod}">
+            <a href="//pinterest.com/pin/create/button/?url=@{ProductR prodId}&description=#{productName prod}"
+               target="_BLANK">
                 Epingler sur Pinterest
         $else
          $with Entity picId pic <- head pics
           $with picExt <- pictureExtension pic
-
-            <a href="//pinterest.com/pin/create/button/?url=@{ProductR prodId}&media=@{routePicture picId PicLarge picExt}&description=#{productName prod}">
+            <a href="//pinterest.com/pin/create/button/?url=@{ProductR prodId}&media=@{routePicture picId PicLarge picExt}&description=#{productName prod}"
+               target="_BLANK">
                 Epingler sur Pinterest
 
     <div .clear_float>

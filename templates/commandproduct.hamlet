@@ -1,0 +1,35 @@
+$maybe Entity picId pic <- mPic
+    $with picExt <- pictureExtension pic
+        <div .carrousel>
+            <div .item>
+                <img src=@{routePicture picId PicWide picExt} alt="Mise en avant"/>
+                <div .info>
+                    <h2>Commande d'une création
+                    <span .description>#{productName prod}
+$nothing
+<div .page>
+    $maybe _ <- mPic
+    $nothing
+        <h1>Commande d'un produit
+        <h2>#{productName prod}
+
+    <div .notice>
+        <p>
+            Vous êtes sur le point d'effectuer une commande d'une création de 
+            notre catalogue.
+
+        <p>
+            Nous traitons chaque demande individuellement et nous vous demandons
+            donc de remplir le plus précisément possible les informations de ce
+            formulaire.
+
+        <p>
+            Nous vous recontacterons par téléphone ou par email à la suite à
+            l'envoi de ce formulaire pour préciser et éventuellement valider
+            votre commande.
+
+    <form method=post action=@{CommandProductR prodId} enctype=#{enctype}>
+        ^{widget}
+
+        <div .clear_float>
+        <input type=submit value="Soumettre ma demande" />

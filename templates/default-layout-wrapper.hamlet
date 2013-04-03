@@ -33,7 +33,7 @@ $newline never
                         <a href=@{HomeR}>
                             Créations
                     <li>
-                        <a href=@{HomeR}>
+                        <a href=@{CommandSpecialR}>
                             Demande spéciale
                     <li>
                         <a href=@{HomeR}>
@@ -50,5 +50,5 @@ $newline never
                     Suivez notre page Facebook !
                 &nbsp;• © 2013 Be Chouette
                 &nbsp;• Site web par&nbsp;
-                <a href="mailto:raphaeljavaux[at]gmail.com">
+                <a href="https://github.com/RaphaelJ/bechouette.be">
                     Raphael Javaux
