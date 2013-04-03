@@ -5,7 +5,9 @@ $maybe Entity picId pic <- mPic
                 <img src=@{routePicture picId PicWide picExt} alt="Mise en avant"/>
                 <div .info>
                     <h2>Commande d'une création
-                    <span .description>#{productName prod}
+                    <span .description>
+                        Faire une demande personalisée pour la création
+                        « #{productName prod} ».
 $nothing
 <div .page>
     $maybe _ <- mPic

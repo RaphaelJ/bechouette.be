@@ -143,7 +143,7 @@ sendCommandMail mProdId cmd = do
 
     email <- extraEmail <$> getExtra
     let to = Address Nothing email
-        from = Address (Just $ cLastName cmd <> cFirstName cmd)
+        from = Address (Just $ cLastName cmd <> " " <> cFirstName cmd)
                        (cEmail cmd)
         subject = "Nouvelle demande sur Be Chouette"
         text = renderMarkup $ [hamlet|

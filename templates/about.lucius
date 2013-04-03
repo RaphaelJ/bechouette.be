@@ -1,0 +1,4 @@
+#contacts {
+    float: right;
+    margin: 50px;
+}

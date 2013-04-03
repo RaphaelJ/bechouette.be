@@ -9,6 +9,8 @@
 /command_spec/                  CommandSpecialR         GET POST
 /command_confirm/               CommandConfirmR         GET
 
+/about                          AboutR                  GET
+
 /admin                          AdminR                  GET POST
 /admin/login                    AdminLoginR             GET POST
 

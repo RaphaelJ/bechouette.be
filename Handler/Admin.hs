@@ -207,9 +207,9 @@ prodForm catId prod = renderDivs $
     Product catId <$> areq textField "Nom du produit" (productName <$> prod)
                   <*> aopt textField "Référence du produit (facultatif)"
                            (productRef <$> prod)
-                  <*> areq textField "Description rapide"
+                  <*> areq textField "Description rapide (catalogue et Facebook)"
                            (productShortDesc <$> prod)
-                  <*> areq textareaField "Description complète"
+                  <*> areq textareaField "Description complète (fiche produit)"
                            (productDesc <$> prod)
                   <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
                            (productDetails <$> prod)
@@ -218,7 +218,7 @@ prodForm catId prod = renderDivs $
                            (productPrice <$> prod)
                   <*> areq checkBoxField "Disponible à la vente"
                            (productAvailable <$> prod)
-                  <*> areq checkBoxField "Afficher à la une"
+                  <*> areq checkBoxField "Afficher à la une de l'accueil"
                            (productTop <$> prod)
 
 -- | Supprime les produits et ses dépendances.
@@ -255,7 +255,11 @@ postAdminPicturesR prodId = do
     ((result, widget), enctype) <- runFormPost pictureForm
 
     err <- case result of
-        FormSuccess info -> processImage info
+        FormSuccess info -> do
+            mErr <- processImage info
+            case mErr of
+                Just err -> return $ Just err
+                Nothing  -> redirect $ AdminPicturesR prodId
         _ -> return Nothing
 
     (prod, pics) <- runDB $ do

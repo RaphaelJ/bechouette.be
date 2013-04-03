@@ -1,0 +1,61 @@
+<div .carrousel>
+    <div .item>
+        <img src=@{StaticR img_etiquettes_jpg} alt="Etiquettes de Be Chouette"/>
+        <div .info>
+            <h2>A propos de Be Chouette
+            <span .description>Contacts, méthodes et revendeurs.
+
+<div .page>
+    <p #contacts .error>
+        <strong>Be Chouette</strong><br />
+
+        Site web : <a href="@{HomeR}">@{HomeR}</a><br />
+
+        Email :
+        <a href="mailto:#{extraEmail extra}">
+            #{extraEmail extra}
+        <br />
+
+        Téléphone : 04/276.48.31
+
+    <div #infos>
+        <h2>Be Chouette en pratique
+
+        <p>
+            Parce que vous êtes nombreux(ses) à me l'avoir demandé et surtout
+            parce qu'il est tout de même grand temps que je réponde à cette
+            question ... <br />
+
+        <p>
+            <strong>Comment commander?
+            <br />
+
+        <p>
+            La fan-page vous permet de découvrir les petites choses réalisées.
+            Si une pièce vous intéresse ou que vous avez une demande
+            particulière, voilà comment cela se passe:
+
+        <p>
+            1. Plusieurs moyens de me manifeseter votre intérêt pour une pièce 
+            ou l'autre... ou de me faire part de vos envies ou souhaits 
+            particuliers
+
+        <p>
+            - soit par un petit message privé sur la page<br />
+            - soit par téléphone: 04/276 48 31, c'est parfois encore plus simple
+            de discuter de vive voie ;-)<br />
+
+        <p>N'hésitez pas! Aucune demande n'est farfelue...
+
+        <p>
+            2. Be Chouette a démarré début septembre... donc à l'heure actuelle,
+            pas encore de point de vente. Mais mais mais!!!
+
+        <p>Vous pouvez recevoir votre commande:
+
+        <p>
+            - soit par la Poste<br />
+
+            - soit en venant la retirer à mon domicile (Neupré, région liégeoise)
+
+        <p>Et voilà!!! Donc vous l'aurez compris, n'hésitez pas...
