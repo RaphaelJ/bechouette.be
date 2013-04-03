@@ -29,15 +29,57 @@ $newline never
                     <img alt=Logo src=@{StaticR img_logo_png}/>
 
                 <ul>
-                    <li .enabled>
-                        <a href=@{HomeR}>
-                            Créations
-                    <li>
-                        <a href=@{CommandSpecialR}>
-                            Demande spéciale
-                    <li>
-                        <a href=@{AboutR}>
-                            A propos de Be Chouette
+                    $maybe route <- currentRoute
+                        $case route
+                            $of HomeR
+                                <li .enabled>
+                                    <a href=@{HomeR}>Créations
+                                <li>
+                                    <a href=@{CommandSpecialR}>Demande spéciale
+                                <li>
+                                    <a href=@{AboutR}>A propos de Be Chouette
+                            $of ProductR _
+                                <li .enabled>
+                                    <a href=@{HomeR}>Créations
+                                <li>
+                                    <a href=@{CommandSpecialR}>Demande spéciale
+                                <li>
+                                    <a href=@{AboutR}>A propos de Be Chouette
+                            $of CommandProductR _
+                                <li .enabled>
+                                    <a href=@{HomeR}>Créations
+                                <li>
+                                    <a href=@{CommandSpecialR}>Demande spéciale
+                                <li>
+                                    <a href=@{AboutR}>A propos de Be Chouette
+                            $of CommandSpecialR
+                                <li>
+                                    <a href=@{HomeR}>Créations
+                                <li .enabled>
+                                    <a href=@{CommandSpecialR}>Demande spéciale
+                                <li>
+                                    <a href=@{AboutR}>A propos de Be Chouette
+                            $of AboutR
+                                <li>
+                                    <a href=@{HomeR}>Créations
+                                <li>
+                                    <a href=@{CommandSpecialR}>Demande spéciale
+                                <li .enabled>
+                                    <a href=@{AboutR}>A propos de Be Chouette
+                            $of _
+                                <li>
+                                    <a href=@{HomeR}>Créations
+                                <li>
+                                    <a href=@{CommandSpecialR}>Demande spéciale
+                                <li>
+                                    <a href=@{AboutR}>A propos de Be Chouette
+                    $nothing
+                        <li>
+                            <a href=@{HomeR}>Créations
+                        <li>
+                            <a href=@{CommandSpecialR}>Demande spéciale
+                        <li>
+                            <a href=@{AboutR}>A propos de Be Chouette
 
                 <div #info>
                     Créations home-made de vêtements et articles pour petits et grands enfants
