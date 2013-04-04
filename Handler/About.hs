@@ -5,5 +5,6 @@ import Import
 getAboutR :: Handler RepHtml
 getAboutR = do
     extra <- getExtra
-    setTitle "A propos de Be Chouette"
-    defaultLayout $(widgetFile "about")
+    defaultLayout $ do
+        setTitle "A propos de Be Chouette"
+        $(widgetFile "about")
