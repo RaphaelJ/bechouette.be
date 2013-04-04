@@ -16,9 +16,8 @@ getProductR prodId = do
         $(widgetFile "product")
         toWidgetHead [hamlet|
             <meta property="og:title" content="#{productName prod}" />
-            <meta property="og:type" content="article" />
+            <meta property="og:type" content="object" />
             <meta property="og:url" content="@{ProductR prodId}" />
-            <meta property="og:site_name" content="Be Chouette" />
             <meta property="og:description"content="#{productShortDesc prod}" />
             $if null pics
             $else

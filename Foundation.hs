@@ -90,6 +90,9 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             $(widgetFile "normalize")
             $(widgetFile "default-layout")
+             toWidgetHead [hamlet|
+                <meta property="og:site_name" content="Be Chouette" />
+                |]
             addScriptRemote "http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"
         hamletToRepHtml $(hamletFile "templates/default-layout-wrapper.hamlet")
 
