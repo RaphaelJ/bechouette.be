@@ -1,4 +1,15 @@
 #contacts {
     float: right;
-    margin: 50px;
+    margin: 40px;
+
+    h3 {
+        margin: 5px;
+    }
+
+    table {
+        th {
+            padding-right: 15px;
+            text-align: left;
+        }
+    }
 }

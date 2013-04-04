@@ -9,6 +9,7 @@ module Handler.Admin (
 
 import Import
 import Prelude (tail)
+import Control.Applicative ((<|>))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Ratio
@@ -142,7 +143,7 @@ getAdminNewProdR catId = do
 
     cat <- runDB $ get404 catId
 
-    (widget, enctype) <- generateFormPost (prodForm catId Nothing)
+    (widget, enctype) <- generateFormPost (prodForm (Just catId) Nothing)
 
     defaultLayout $ do
         setTitle "Ajouter un nouveau produit - Be Chouette"
@@ -152,7 +153,7 @@ postAdminNewProdR :: CategoryId -> Handler RepHtml
 postAdminNewProdR catId = do
     redirectIfNotConnected
 
-    ((result, widget), enctype) <- runFormPost (prodForm catId Nothing)
+    ((result, widget), enctype) <- runFormPost (prodForm (Just catId) Nothing)
 
     case result of
         FormSuccess prod -> do
@@ -169,9 +170,8 @@ getAdminEditProdR prodId = do
     redirectIfNotConnected
 
     prod <- runDB $ get404 prodId
-    let catId = productCategory prod
 
-    (widget, enctype) <- generateFormPost (prodForm catId (Just prod))
+    (widget, enctype) <- generateFormPost (prodForm Nothing (Just prod))
 
     defaultLayout $ do
         setTitle "Modifier un produit - Be Chouette"
@@ -182,9 +182,8 @@ postAdminEditProdR prodId = do
     redirectIfNotConnected
 
     prod <- runDB $ get404 prodId
-    let catId = productCategory prod
 
-    ((result, widget), enctype) <- runFormPost (prodForm catId (Just prod))
+    ((result, widget), enctype) <- runFormPost (prodForm Nothing (Just prod))
 
     case result of
         FormSuccess newProd -> do
@@ -202,24 +201,32 @@ getAdminRemoveProdR prodId = do
     runDB $ removeProduct prodId
     redirect AdminR
 
-prodForm :: CategoryId -> Maybe Product -> Form Product
-prodForm catId prod = renderDivs $
-    Product catId <$> areq textField "Nom du produit" (productName <$> prod)
-                  <*> aopt textField "Référence du produit (facultatif)"
-                           (productRef <$> prod)
-                  <*> areq textField "Description rapide (catalogue et Facebook)"
-                           (productShortDesc <$> prod)
-                  <*> areq textareaField "Description complète (fiche produit)"
-                           (productDesc <$> prod)
-                  <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
-                           (productDetails <$> prod)
-                  <*> aopt doubleField
-                           "Prix (facultatif, '.' pour séparer les décimales)"
-                           (productPrice <$> prod)
-                  <*> areq checkBoxField "Disponible à la vente"
-                           (productAvailable <$> prod)
-                  <*> areq checkBoxField "Afficher à la une de l'accueil"
-                           (productTop <$> prod)
+prodForm :: Maybe CategoryId -> Maybe Product -> Form Product
+prodForm mCatId prod html = do
+    catFields <- lift $ runDB $ do
+        cats <- selectList [] [Asc CategoryName]
+        forM cats $ \(Entity catId cat) -> do
+            return (categoryName cat, catId)
+
+    flip renderDivs html $ Product
+        <$> areq (selectFieldList catFields) "Catégorie du produit"
+                 ((productCategory <$> prod) <|> mCatId)
+        <*> areq textField "Nom du produit" (productName <$> prod)
+        <*> aopt textField "Référence du produit (facultatif)"
+                (productRef <$> prod)
+        <*> areq textField "Description rapide (catalogue et Facebook)"
+                (productShortDesc <$> prod)
+        <*> areq textareaField "Description complète (fiche produit)"
+                (productDesc <$> prod)
+        <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
+                (productDetails <$> prod)
+        <*> aopt doubleField
+                "Prix (facultatif, '.' pour séparer les décimales)"
+                (productPrice <$> prod)
+        <*> areq checkBoxField "Disponible à la vente"
+                (productAvailable <$> prod)
+        <*> areq checkBoxField "Afficher à la une de l'accueil"
+                (productTop <$> prod)
 
 -- | Supprime les produits et ses dépendances.
 removeProduct :: ProductId -> YesodDB sub App ()

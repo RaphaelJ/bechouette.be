@@ -6,17 +6,21 @@
             <span .description>Contacts, méthodes et revendeurs.
 
 <div .page>
-    <p #contacts .error>
-        <strong>Be Chouette</strong><br />
+    <div #contacts .error>
+        <h3>Be Chouette
 
-        Site web : <a href="@{HomeR}">@{HomeR}</a><br />
-
-        Email :
-        <a href="mailto:#{extraEmail extra}">
-            #{extraEmail extra}
-        <br />
-
-        Téléphone : 04/276.48.31
+        <table>
+            <tr>
+                <th>Site web
+                <td><a href="@{HomeR}">@{HomeR}</a>
+            <tr>
+                <th>Email
+                <td>
+                    <a href="mailto:#{extraEmail extra}">
+                        #{extraEmail extra}
+            <tr>
+                <th>Téléphone
+                <td>04/276.48.31
 
     <div #infos>
         <h2>Be Chouette en pratique

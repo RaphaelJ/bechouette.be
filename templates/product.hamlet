@@ -19,6 +19,8 @@
 
     $maybe price <- productPrice prod
         <p .price>#{price} €
+    $nothing
+        <p .price>Prix sur demande
 
     <h1>#{productName prod}
 
