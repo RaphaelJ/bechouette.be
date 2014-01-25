@@ -13,7 +13,7 @@ import Control.Applicative ((<|>))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Ratio
-import Database.Persist.GenericSql (rollback)
+import Database.Persist.Sql (rollback)
 import qualified Data.Text as T
 import System.Directory
 import System.FilePath (takeExtension)

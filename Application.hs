@@ -11,8 +11,8 @@ import Yesod.Default.Config
 import Yesod.Default.Main
 import Yesod.Default.Handlers
 import Network.Wai.Middleware.RequestLogger
-import qualified Database.Persist.Store
-import Database.Persist.GenericSql (runMigration)
+import qualified Database.Persist
+import Database.Persist.Sql (runMigration)
 import Network.HTTP.Conduit (newManager, def)
 import Control.Monad.Logger (runLoggingT)
 import System.IO (stdout)
@@ -59,15 +59,15 @@ makeFoundation conf = do
     manager <- newManager def
     s <- staticSite
     dbconf <- withYamlEnvironment "config/sqlite.yml" (appEnv conf)
-              Database.Persist.Store.loadConfig >>=
-              Database.Persist.Store.applyEnv
-    p <- Database.Persist.Store.createPoolConfig (dbconf :: Settings.PersistConfig)
+              Database.Persist.loadConfig >>=
+              Database.Persist.applyEnv
+    p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConfig)
     logger <- mkLogger True stdout
     let foundation = App conf s p manager dbconf logger
 
     -- Perform database migration using our application's logging settings.
     runLoggingT
-        (Database.Persist.Store.runPool dbconf (runMigration migrateAll) p)
+        (Database.Persist.runPool dbconf (runMigration migrateAll) p)
         (messageLoggerSource foundation logger)
 
     return foundation
