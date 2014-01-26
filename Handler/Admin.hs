@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 module Handler.Admin (
-      getAdminR, postAdminR, getAdminLoginR, postAdminLoginR
+      getAdminLoginR, postAdminLoginR
+    , getAdminProductsR, postAdminProductsR, getAdminEditProdR
+    , postAdminEditProdR, postAdminRemoveProdR
+      
     , getAdminEditCatR, postAdminEditCatR, getAdminRemoveCatR
     , getAdminNewProdR, postAdminNewProdR, getAdminEditProdR, postAdminEditProdR
     , getAdminRemoveProdR, getAdminPicturesR, postAdminPicturesR
@@ -25,8 +28,151 @@ import Handler.Home (listProducts)
 sessionKey :: Text
 sessionKey = "CONNECTED"
 
-getAdminR :: Handler Html
-getAdminR = do
+getAdminLoginR :: Handler Html
+getAdminLoginR = do
+    redirectIfConnected
+
+    (widget, enctype) <- generateFormPost loginForm
+
+    let err = Nothing :: Maybe Text
+    defaultLayout $ do
+        setTitle "Connexion à l'administration - Be Chouette"
+        $(widgetFile "admin-login")
+
+postAdminLoginR :: Handler Html
+postAdminLoginR = do
+    redirectIfConnected
+
+    ((result, widget), enctype) <- runFormPost loginForm
+
+    validPass <- extraPassword <$> getExtra
+    case result of
+        FormSuccess pass | pass == validPass -> do
+            setSession sessionKey ""
+            redirect AdminR
+        _ -> do
+            let err = Just "Mot de passe invalide." :: Maybe Text
+            defaultLayout $ do
+                setTitle "Connexion à l'administration - Be Chouette"
+                $(widgetFile "admin-login")
+
+loginForm :: Form Text
+loginForm = renderDivs $ areq passwordField "Mot de passe" Nothing
+
+redirectIfConnected :: Handler ()
+redirectIfConnected = do
+    v <- lookupSession sessionKey
+    case v of
+        Just _  -> redirect AdminProductsR
+        Nothing -> return ()
+
+-- Produits --------------------------------------------------------------------
+
+-- | Liste des produits.
+getAdminProductsR :: Handler Html
+getAdminProductsR = do
+    redirectIfNotConnected
+
+    (widget, enctype) <- generateFormPost (prodForm Nothing)
+
+    defaultLayout $ do
+        setTitle "Gestion des produits - Be Chouette"
+        $(widgetFile "admin-products")
+
+-- | Nouveau produit.
+postAdminProductsR :: Handler Html
+postAdminProductsR = do
+    redirectIfNotConnected
+
+    ((result, widget), enctype) <- runFormPost (prodForm Nothing)
+
+    case result of
+        FormSuccess prod -> do
+            _ <- runDB $ insert prod
+            redirect AdminProductsR
+        _ -> do
+            defaultLayout $ do
+                setTitle "Ajouter un nouveau produit - Be Chouette"
+                $(widgetFile "admin-products")
+
+getAdminEditProdR :: ProductId -> Handler Html
+getAdminEditProdR prodId = do
+    redirectIfNotConnected
+
+    prod <- runDB $ get404 prodId
+
+    (widget, enctype) <- generateFormPost (prodForm (Just prod))
+
+    defaultLayout $ do
+        setTitle "Modifier un produit - Be Chouette"
+        $(widgetFile "admin-product")
+
+postAdminEditProdR :: ProductId -> Handler Html
+postAdminEditProdR prodId = do
+    redirectIfNotConnected
+
+    prod <- runDB $ get404 prodId
+
+    ((result, widget), enctype) <- runFormPost (prodForm (Just prod))
+
+    case result of
+        FormSuccess newProd -> do
+            _ <- runDB $ replace prodId newProd
+            redirect AdminProductsR
+        _ -> do
+            defaultLayout $ do
+                setTitle "Modifier un produit - Be Chouette"
+                $(widgetFile "editprod")
+
+getAdminRemoveProdR :: ProductId -> Handler ()
+getAdminRemoveProdR prodId = do
+    redirectIfNotConnected
+
+    runDB $ removeProduct prodId
+    redirect AdminProductsR
+
+-- | Supprime les produits et ses dépendances.
+removeProduct :: ProductId -> YesodDB App ()
+removeProduct prodId = do
+    delete prodId
+
+    pics <- selectList [PictureProduct ==. prodId] []
+    forM_ pics $ \(Entity picId pic) -> do
+        removePicture picId (pictureExtension pic)
+
+    subcats <- selectList [SubCategoryProductProduct ==. prodId] []
+    forM_ subcats $ delete . entityKey
+
+    birthlists <- selectList [BirthListProductProduct ==. prodId] []
+    forM_ birthlists $ delete . entityKey
+
+prodForm :: Maybe Product -> Form Product
+prodForm mCatId prod html =
+    flip renderDivs html $ Product
+        <$> areq textField "Nom du produit" (productName <$> prod)
+        <*> aopt textField "Référence du produit (facultatif)"
+                (productRef <$> prod)
+        <*> areq textField "Description rapide (pour catalogue et Facebook)"
+                (productShortDesc <$> prod)
+        <*> areq textareaField "Description complète (pour la fiche produit)"
+                (productDesc <$> prod)
+        <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
+                (productDetails <$> prod)
+        <*> aopt doubleField
+                "Prix (facultatif, '.' pour séparer les décimales)"
+                (productPrice <$> prod)
+
+-- Photos ----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+getAdminLoginR :: Handler Html
+getAdminLoginR = do
     redirectIfNotConnected
 
     (widget, enctype) <- generateFormPost (categoryForm Nothing)
@@ -106,136 +252,9 @@ categoryForm cat = renderDivs $ Category
     <*> areq intField  "Ordre de la catégorie (classées par ordre croissant)"
                       (categoryOrder <$> cat)
 
--- -----------------------------------------------------------------------------
-
-getAdminLoginR :: Handler Html
-getAdminLoginR = do
-    (widget, enctype) <- generateFormPost loginForm
-
-    let err = Nothing :: Maybe Text
-    defaultLayout $ do
-        setTitle "Connexion à l'administration - Be Chouette"
-        $(widgetFile "login")
-
-postAdminLoginR :: Handler Html
-postAdminLoginR = do
-    ((result, widget), enctype) <- runFormPost loginForm
-
-    validPass <- extraPassword <$> getExtra
-    case result of
-        FormSuccess pass | pass == validPass -> do
-            setSession sessionKey ""
-            redirect AdminR
-        _ -> do
-            let err = Just "Mot de passe invalide." :: Maybe Text
-            defaultLayout $ do
-                setTitle "Connexion à l'administration - Be Chouette"
-                $(widgetFile "login")
-
-loginForm :: Form Text
-loginForm = renderDivs $ areq passwordField "Mot de passe" Nothing
 
 -- -----------------------------------------------------------------------------
 
-getAdminNewProdR :: CategoryId -> Handler Html
-getAdminNewProdR catId = do
-    redirectIfNotConnected
-
-    cat <- runDB $ get404 catId
-
-    (widget, enctype) <- generateFormPost (prodForm (Just catId) Nothing)
-
-    defaultLayout $ do
-        setTitle "Ajouter un nouveau produit - Be Chouette"
-        $(widgetFile "newprod")
-
-postAdminNewProdR :: CategoryId -> Handler Html
-postAdminNewProdR catId = do
-    redirectIfNotConnected
-
-    ((result, widget), enctype) <- runFormPost (prodForm (Just catId) Nothing)
-
-    case result of
-        FormSuccess prod -> do
-            _ <- runDB $ get404 catId >> insert prod
-            redirect AdminR
-        _ -> do
-            cat <- runDB $ get404 catId
-            defaultLayout $ do
-                setTitle "Ajouter un nouveau produit - Be Chouette"
-                $(widgetFile "newprod")
-
-getAdminEditProdR :: ProductId -> Handler Html
-getAdminEditProdR prodId = do
-    redirectIfNotConnected
-
-    prod <- runDB $ get404 prodId
-
-    (widget, enctype) <- generateFormPost (prodForm Nothing (Just prod))
-
-    defaultLayout $ do
-        setTitle "Modifier un produit - Be Chouette"
-        $(widgetFile "editprod")
-
-postAdminEditProdR :: ProductId -> Handler Html
-postAdminEditProdR prodId = do
-    redirectIfNotConnected
-
-    prod <- runDB $ get404 prodId
-
-    ((result, widget), enctype) <- runFormPost (prodForm Nothing (Just prod))
-
-    case result of
-        FormSuccess newProd -> do
-            _ <- runDB $ replace prodId newProd
-            redirect AdminR
-        _ -> do
-            defaultLayout $ do
-                setTitle "Modifier un produit - Be Chouette"
-                $(widgetFile "editprod")
-
-getAdminRemoveProdR :: ProductId -> Handler ()
-getAdminRemoveProdR prodId = do
-    redirectIfNotConnected
-
-    runDB $ removeProduct prodId
-    redirect AdminR
-
-prodForm :: Maybe CategoryId -> Maybe Product -> Form Product
-prodForm mCatId prod html = do
-    catFields <- lift $ runDB $ do
-        cats <- selectList [] [Asc CategoryName]
-        forM cats $ \(Entity catId cat) -> do
-            return (categoryName cat, catId)
-
-    flip renderDivs html $ Product
-        <$> areq (selectFieldList catFields) "Catégorie du produit"
-                 ((productCategory <$> prod) <|> mCatId)
-        <*> areq textField "Nom du produit" (productName <$> prod)
-        <*> aopt textField "Référence du produit (facultatif)"
-                (productRef <$> prod)
-        <*> areq textField "Description rapide (pour catalogue et Facebook)"
-                (productShortDesc <$> prod)
-        <*> areq textareaField "Description complète (pour la fiche produit)"
-                (productDesc <$> prod)
-        <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
-                (productDetails <$> prod)
-        <*> aopt doubleField
-                "Prix (facultatif, '.' pour séparer les décimales)"
-                (productPrice <$> prod)
-        <*> areq checkBoxField "Disponible à la vente"
-                (productAvailable <$> prod)
-        <*> areq checkBoxField "Afficher en grand à la une de l'accueil"
-                (productTop <$> prod)
-
--- | Supprime les produits et ses dépendances.
-removeProduct :: ProductId -> YesodDB App ()
-removeProduct prodId = do
-    delete prodId
-
-    pics <- selectList [PictureProduct ==. prodId] []
-    forM_ pics $ \(Entity picId pic) -> do
-        removePicture picId (pictureExtension pic)
 
 -- -----------------------------------------------------------------------------
 

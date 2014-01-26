@@ -1,5 +1,6 @@
 <div .page>
-    <h1>Connexion à l'administration
+    <div .page-header>
+        <h1>Administration
 
     $maybe msg <- err
         <p>
@@ -8,4 +9,4 @@
     <form method=post action=@{AdminLoginR} enctype=#{enctype}>
         ^{widget}
 
-        <input .btn type=submit value=Connexion>
+        <input .btn-primary type=submit value=Connexion>
