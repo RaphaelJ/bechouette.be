@@ -4,7 +4,7 @@ module Handler.Home (getHomeR, listProducts) where
 import Import
 import Control.Monad
 
-getHomeR :: Handler RepHtml
+getHomeR :: Handler Html
 getHomeR = do
     (topProds, cats) <- runDB $ do
         topProds <- listTopProds
@@ -15,14 +15,14 @@ getHomeR = do
         setTitle "Créations - Be Chouette"
         $(widgetFile "home")
 
-listTopProds :: YesodDB sub App [(Entity Product, Maybe (Entity Picture))]
+listTopProds :: YesodDB App [(Entity Product, Maybe (Entity Picture))]
 listTopProds = do
     prods <- selectList [ProductTop ==. True] [Asc ProductName]
     forM prods $ \prod@(Entity prodId _) -> do
         mPic <- getPic prodId
         return (prod, mPic)
 
-listProducts :: YesodDB sub App [
+listProducts :: YesodDB App [
       (Entity Category, [(Entity Product, Maybe (Entity Picture))])
     ]
 listProducts = do
@@ -34,5 +34,5 @@ listProducts = do
             return (prod, mPic)
         return (cat, prodsPics)
 
-getPic :: ProductId -> YesodDB sub App (Maybe (Entity Picture))
+getPic :: ProductId -> YesodDB App (Maybe (Entity Picture))
 getPic prodId = selectFirst [PictureProduct ==. prodId] [Asc PictureId]

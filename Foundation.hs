@@ -11,14 +11,12 @@ import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Conduit (Manager)
 import qualified Settings
 import Settings.Development (development)
-import Database.Persist (PersistValue (..))
 import qualified Database.Persist
 import Settings.StaticFiles
 import Database.Persist.Sql
 import Model
-import Settings (widgetFile, Extra (..))
+import Settings (PersistConf, widgetFile, Extra (..))
 import Text.Jasmine (minifym)
-import Web.ClientSession (getKey)
 import Text.Hamlet (hamletFile)
 import Text.Printf
 import System.FilePath ((</>))
@@ -30,13 +28,11 @@ import System.FilePath ((</>))
 data App = App
     { settings :: AppConfig DefaultEnv Extra
     , getStatic :: Static -- ^ Settings for static file serving.
-    , connPool :: Database.Persist.PersistConfigPool Settings.PersistConfig -- ^ Database connection pool.
+    , connPool :: Database.Persist.PersistConfigPool PersistConf -- ^ Database connection pool.
     , httpManager :: Manager
-    , persistConfig :: Settings.PersistConfig
+    , persistConfig :: PersistConf
     , appLogger :: Logger
     }
-
-data Page = Collection
 
 -- This is where we define all of the routes in our application. For a full
 -- explanation of the syntax, please see:
@@ -85,13 +81,13 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
-            $(widgetFile "normalize")
+            addStylesheetRemote "//fonts.googleapis.com/css?family=Lato:100italic,100,300italic,300,400italic,400,700italic,700,900italic,900"
+            addStylesheetRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
+            addScriptRemote "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"
+            addScriptRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"
+
             $(widgetFile "default-layout")
-            toWidgetHead [hamlet|
-                <meta property="og:site_name" content="Be Chouette" />
-                |]
-            addScriptRemote "http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"
-        hamletToRepHtml $(hamletFile "templates/default-layout-wrapper.hamlet")
+        giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- This is done to provide an optimization for serving static files from
     -- a separate domain. Please see the staticRoot setting in Settings.hs
@@ -129,7 +125,7 @@ instance Yesod App where
 
 -- How to run database actions.
 instance YesodPersist App where
-    type YesodPersistBackend App = SqlPersist
+    type YesodPersistBackend App = SqlPersistT
     runDB f = do
         master <- getYesod
         Database.Persist.runPool

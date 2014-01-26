@@ -1,19 +1,38 @@
 Category
-    name Text
-    order Int
-    UniqueCategoryName name
+    name                        Text
+    order                       Int
+    UniqueCategoryName          name
+
+SubCategory
+    category                    CategoryId
+    name                        Text
+    UniqueSubCategoryName       category name
+
+SubCategoryProduct
+    subCategory                 SubCategoryId
+    product                     ProductId
+    top                         Bool
+    UniqueSubCategoryProduct    subCategory product
+
+BirthList
+    name                        Text
+    UniqueBirthListName         name
+
+BirthListProduct
+    birthList                   BirthListId
+    product                     ProductId
+    reserved                    Bool
+    UniqueBirthListProduct      birthList product
 
 Product
-    category CategoryId
-    name Text
-    ref Text Maybe
-    shortDesc Text
-    desc Textarea
-    details Textarea
-    price Double Maybe
-    available Bool
-    top Bool
+    name                        Text
+    ref                         Text Maybe
+    shortDesc                   Text
+    desc                        Textarea
+    details                     Textarea
+    price                       Double Maybe
+    available                   Bool
 
 Picture
-    product ProductId
-    extension Text
+    product                     ProductId
+    extension                   Text

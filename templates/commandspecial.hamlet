@@ -27,4 +27,4 @@
         ^{widget}
 
         <div .clear_float>
-        <input type=submit value="Soumettre ma demande" />
+        <input .btn type=submit value="Soumettre ma demande" />

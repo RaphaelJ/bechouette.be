@@ -45,16 +45,6 @@
     font-size: 12px;
 }
 
-.command a, .command a:visited {
-    padding-left: 30px;
-
-    background-image: url('@{StaticR img_cart_png}');
-    background-repeat: no-repeat;
-    background-position: 10px center;
-
-    color: white;
-}
-
 .not_available {
     font-style: italic;
     font-size: 0.9em;

@@ -1,4 +1,15 @@
 <div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li .active>
+            Produits
+        <li>
+            Catalogue
+        <li>
+            Listes de naissance
+
     <h1>Administration des produits
 
     <h2>Ajouter une nouvelle catégorie
@@ -7,11 +18,11 @@
         <p>
             <strong>#{msg}
 
-    <form method=post action=@{AdminR} enctype=#{enctype}>
+    <form role=form method=post action=@{AdminR} enctype=#{enctype}>
         <table>
             ^{widget}
 
-        <input type=submit value="Ajouter la catégorie">
+        <input .btn type=submit value="Ajouter la catégorie">
 
     <h2>Catégories existantes
 

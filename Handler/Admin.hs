@@ -10,22 +10,22 @@ module Handler.Admin (
 import Import
 import Prelude (tail)
 import Control.Applicative ((<|>))
-import qualified Control.Exception as E
 import Control.Monad
 import Data.Ratio
-import Database.Persist.Sql (rollback)
+import Database.Persist.Sql (askSqlConn, connPrepare, connRollback)
 import qualified Data.Text as T
 import System.Directory
 import System.FilePath (takeExtension)
 import qualified Vision.Image as I
-import qualified Vision.Primitive as I
+import Vision.Primitive (Z (..), (:.) (..), Rect (..))
+import Text.Printf
 
 import Handler.Home (listProducts)
 
 sessionKey :: Text
 sessionKey = "CONNECTED"
 
-getAdminR :: Handler RepHtml
+getAdminR :: Handler Html
 getAdminR = do
     redirectIfNotConnected
 
@@ -39,7 +39,7 @@ getAdminR = do
         $(widgetFile "admin")
 
 -- | Ajout d'une nouvelle catégorie.
-postAdminR :: Handler RepHtml
+postAdminR :: Handler Html
 postAdminR = do
     redirectIfNotConnected
 
@@ -60,7 +60,7 @@ postAdminR = do
         setTitle "Administration - Be Chouette"
         $(widgetFile "admin")
 
-getAdminEditCatR :: CategoryId -> Handler RepHtml
+getAdminEditCatR :: CategoryId -> Handler Html
 getAdminEditCatR catId = do
     redirectIfNotConnected
 
@@ -72,7 +72,7 @@ getAdminEditCatR catId = do
         setTitle "Modifier une catégorie - Be Chouette"
         $(widgetFile "editcat")
 
-postAdminEditCatR :: CategoryId -> Handler RepHtml
+postAdminEditCatR :: CategoryId -> Handler Html
 postAdminEditCatR catId = do
     redirectIfNotConnected
 
@@ -108,7 +108,7 @@ categoryForm cat = renderDivs $ Category
 
 -- -----------------------------------------------------------------------------
 
-getAdminLoginR :: Handler RepHtml
+getAdminLoginR :: Handler Html
 getAdminLoginR = do
     (widget, enctype) <- generateFormPost loginForm
 
@@ -117,7 +117,7 @@ getAdminLoginR = do
         setTitle "Connexion à l'administration - Be Chouette"
         $(widgetFile "login")
 
-postAdminLoginR :: Handler RepHtml
+postAdminLoginR :: Handler Html
 postAdminLoginR = do
     ((result, widget), enctype) <- runFormPost loginForm
 
@@ -137,7 +137,7 @@ loginForm = renderDivs $ areq passwordField "Mot de passe" Nothing
 
 -- -----------------------------------------------------------------------------
 
-getAdminNewProdR :: CategoryId -> Handler RepHtml
+getAdminNewProdR :: CategoryId -> Handler Html
 getAdminNewProdR catId = do
     redirectIfNotConnected
 
@@ -149,7 +149,7 @@ getAdminNewProdR catId = do
         setTitle "Ajouter un nouveau produit - Be Chouette"
         $(widgetFile "newprod")
 
-postAdminNewProdR :: CategoryId -> Handler RepHtml
+postAdminNewProdR :: CategoryId -> Handler Html
 postAdminNewProdR catId = do
     redirectIfNotConnected
 
@@ -165,7 +165,7 @@ postAdminNewProdR catId = do
                 setTitle "Ajouter un nouveau produit - Be Chouette"
                 $(widgetFile "newprod")
 
-getAdminEditProdR :: ProductId -> Handler RepHtml
+getAdminEditProdR :: ProductId -> Handler Html
 getAdminEditProdR prodId = do
     redirectIfNotConnected
 
@@ -177,7 +177,7 @@ getAdminEditProdR prodId = do
         setTitle "Modifier un produit - Be Chouette"
         $(widgetFile "editprod")
 
-postAdminEditProdR :: ProductId -> Handler RepHtml
+postAdminEditProdR :: ProductId -> Handler Html
 postAdminEditProdR prodId = do
     redirectIfNotConnected
 
@@ -214,9 +214,9 @@ prodForm mCatId prod html = do
         <*> areq textField "Nom du produit" (productName <$> prod)
         <*> aopt textField "Référence du produit (facultatif)"
                 (productRef <$> prod)
-        <*> areq textField "Description rapide (catalogue et Facebook)"
+        <*> areq textField "Description rapide (pour catalogue et Facebook)"
                 (productShortDesc <$> prod)
-        <*> areq textareaField "Description complète (fiche produit)"
+        <*> areq textareaField "Description complète (pour la fiche produit)"
                 (productDesc <$> prod)
         <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
                 (productDetails <$> prod)
@@ -225,11 +225,11 @@ prodForm mCatId prod html = do
                 (productPrice <$> prod)
         <*> areq checkBoxField "Disponible à la vente"
                 (productAvailable <$> prod)
-        <*> areq checkBoxField "Afficher à la une de l'accueil"
+        <*> areq checkBoxField "Afficher en grand à la une de l'accueil"
                 (productTop <$> prod)
 
 -- | Supprime les produits et ses dépendances.
-removeProduct :: ProductId -> YesodDB sub App ()
+removeProduct :: ProductId -> YesodDB App ()
 removeProduct prodId = do
     delete prodId
 
@@ -239,7 +239,7 @@ removeProduct prodId = do
 
 -- -----------------------------------------------------------------------------
 
-getAdminPicturesR :: ProductId -> Handler RepHtml
+getAdminPicturesR :: ProductId -> Handler Html
 getAdminPicturesR prodId = do
     redirectIfNotConnected
 
@@ -255,7 +255,7 @@ getAdminPicturesR prodId = do
         setTitle "Gestion des photos - Be Chouette"
         $(widgetFile "pictures")
 
-postAdminPicturesR :: ProductId -> Handler RepHtml
+postAdminPicturesR :: ProductId -> Handler Html
 postAdminPicturesR prodId = do
     redirectIfNotConnected
 
@@ -286,37 +286,45 @@ postAdminPicturesR prodId = do
             let path = picPath picId PicOriginal picExt
             liftIO $ fileMove info path
 
-            mImg <- liftIO $ E.try $ (I.load path :: IO I.RGBImage)
-            case mImg of
-                Right img -> do
+            mIo <- liftIO $ I.load path Nothing
+            case mIo of
+                Right io -> do
+                    let img = I.convert io :: I.RGBImage
                     resizeImage picId img PicCatalogue picExt
                     resizeImage picId img PicSmall     picExt
                     resizeImage picId img PicLarge     picExt
                     resizeImage picId img PicWide      picExt
                     return Nothing
-                Left (_ :: E.SomeException) -> do
+                Left err -> do
                     liftIO $ removeFile path
                     rollback
-                    return $ Just ("Image invalide." :: Text)
+                    let msg = printf "Image invalide.\nErreur: %s." (show err)
+                    return $ Just $ T.pack msg
 
     resizeImage picId img picType picExt = do
-        let I.Size w h = I.getSize img
-            I.Size w' h' = picSize picType
+        let Z :. h  :. w  = I.shape img
+            Z :. h' :. w' = picSize picType
             -- Redimensionne l'image sur la dimension la plus petite.
             ratio = min (w % w') (h % h')
             (tmpW, tmpH) =
                 (truncate ((w % 1) / ratio), truncate ((h % 1) / ratio))
-            tmp = I.resize I.Bilinear img (I.Size tmpW tmpH)
+            tmp = I.resize img I.Bilinear (Z :. tmpH :. tmpW) :: I.RGBDelayed
             -- Coupe l'image sur la partie centrale.
-            rect = I.Rect ((tmpW - w') `div` 2) ((tmpH - h') `div` 2) w' h'
-            img' = I.crop tmp rect
-        liftIO $ I.save img' (picPath picId picType picExt)
+            rect = Rect ((tmpW - w') `div` 2) ((tmpH - h') `div` 2) w' h'
+            img' = I.crop tmp rect :: I.RGBImage
+        err <- liftIO $ I.save (picPath picId picType picExt) img'
+        case err of
+            Just msg -> error (show msg)
+            Nothing  -> return ()
 
-    picSize PicSmall     = I.Size 75 75
-    picSize PicLarge     = I.Size 350 400
-    picSize PicWide      = I.Size 950 300
-    picSize PicCatalogue = I.Size 300 95
+    picSize PicSmall     = Z :. 75  :. 75
+    picSize PicLarge     = Z :. 400 :. 350
+    picSize PicWide      = Z :. 300 :. 1170
+    picSize PicCatalogue = Z :. 80  :. 255
     picSize PicOriginal  = undefined
+
+    rollback = do conn <- askSqlConn
+                  liftIO $ connRollback conn (connPrepare conn)
 
 pictureForm :: Form FileInfo
 pictureForm = renderDivs $ fileAFormReq "Fichier de l'image"
@@ -332,7 +340,7 @@ getAdminRemovePictureR picId = do
 
     redirect (AdminPicturesR prodId)
 
-removePicture :: PictureId -> Text -> YesodDB sub App ()
+removePicture :: PictureId -> Text -> YesodDB App ()
 removePicture picId picExt = do
     delete picId
     removeFile' PicOriginal

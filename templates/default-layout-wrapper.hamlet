@@ -1,96 +1,30 @@
 $newline never
-\<!doctype html>
-\<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-\<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-\<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-\<!--[if gt IE 8]><!-->
-<html class="no-js" lang="en"> <!--<![endif]-->
-    <head>
-        <meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <title>#{pageTitle pc}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>#{pageTitle pc}
-        <meta name="description" content="Créations home-made de vêtements, articles pour petits et grands enfants en séries limitées">
-        <meta name="author" content="Raphael Javaux">
+    <meta name="description" content="Créations home-made de vêtements, articles pour petits et grands enfants en séries limitées">
+    <meta name="author" content="Raphael Javaux">
+    <meta property="og:site_name" content="Be Chouette" />
 
-        ^{pageHead pc}
+    ^{pageHead pc}
 
-        <link href=@{StaticR img_favicon_png} rel=icon type=image/png>
-        <link href=http://fonts.googleapis.com/css?family=Strait
-              rel=stylesheet type=text/css>
-        <link href=http://fonts.googleapis.com/css?family=Fenix
-              rel=stylesheet type=text/css>
-        \<!--[if lt IE 9]>
-        \<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        \<![endif]-->
-    <body>
-        <div class="container">
-            <header>
-                <a href=@{HomeR}>
-                    <img alt=Logo src=@{StaticR img_logo_png}/>
+    <link href=@{StaticR img_favicon_png} rel=icon type=image/png>
+    <link href=http://fonts.googleapis.com/css?family=Strait
+          rel=stylesheet type=text/css>
+    <link href=http://fonts.googleapis.com/css?family=Fenix
+          rel=stylesheet type=text/css>
 
-                <ul>
-                    $maybe route <- currentRoute
-                        $case route
-                            $of HomeR
-                                <li .enabled>
-                                    <a href=@{HomeR}>Créations
-                                <li>
-                                    <a href=@{CommandSpecialR}>Demande spéciale
-                                <li>
-                                    <a href=@{AboutR}>A propos de Be Chouette
-                            $of ProductR _
-                                <li .enabled>
-                                    <a href=@{HomeR}>Créations
-                                <li>
-                                    <a href=@{CommandSpecialR}>Demande spéciale
-                                <li>
-                                    <a href=@{AboutR}>A propos de Be Chouette
-                            $of CommandProductR _
-                                <li .enabled>
-                                    <a href=@{HomeR}>Créations
-                                <li>
-                                    <a href=@{CommandSpecialR}>Demande spéciale
-                                <li>
-                                    <a href=@{AboutR}>A propos de Be Chouette
-                            $of CommandSpecialR
-                                <li>
-                                    <a href=@{HomeR}>Créations
-                                <li .enabled>
-                                    <a href=@{CommandSpecialR}>Demande spéciale
-                                <li>
-                                    <a href=@{AboutR}>A propos de Be Chouette
-                            $of AboutR
-                                <li>
-                                    <a href=@{HomeR}>Créations
-                                <li>
-                                    <a href=@{CommandSpecialR}>Demande spéciale
-                                <li .enabled>
-                                    <a href=@{AboutR}>A propos de Be Chouette
-                            $of _
-                                <li>
-                                    <a href=@{HomeR}>Créations
-                                <li>
-                                    <a href=@{CommandSpecialR}>Demande spéciale
-                                <li>
-                                    <a href=@{AboutR}>A propos de Be Chouette
-                    $nothing
-                        <li>
-                            <a href=@{HomeR}>Créations
-                        <li>
-                            <a href=@{CommandSpecialR}>Demande spéciale
-                        <li>
-                            <a href=@{AboutR}>A propos de Be Chouette
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
 
-                <div #info>
-                    Créations home-made de vêtements et articles pour petits et grands enfants
+    ^{pageHead pc}
 
-            <div id="main" role="main">
-              ^{pageBody pc}
-            <footer>
-                <a .facebook href=https://www.facebook.com/BeChouette
-                   target=_BLANK>
-                    Suivez notre page Facebook !
-                &nbsp;• © 2013 Be Chouette
-                &nbsp;• Site web par&nbsp;
-                <a href="https://github.com/RaphaelJ/bechouette.be">
-                    Raphael Javaux
+  <body>
+    ^{pageBody pc}

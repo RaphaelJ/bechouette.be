@@ -2,7 +2,7 @@ module Handler.About (getAboutR) where
 
 import Import
 
-getAboutR :: Handler RepHtml
+getAboutR :: Handler Html
 getAboutR = do
     extra <- getExtra
     defaultLayout $ do

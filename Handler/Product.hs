@@ -5,7 +5,7 @@ import Import
 import Prelude (head, tail)
 import Text.Hamlet (shamlet)
 
-getProductR :: ProductId -> Handler RepHtml
+getProductR :: ProductId -> Handler Html
 getProductR prodId = do
     (prod, pics) <- runDB $ (,) <$> get404 prodId
                                 <*> (selectList [PictureProduct ==. prodId]

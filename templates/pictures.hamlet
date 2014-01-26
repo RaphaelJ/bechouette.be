@@ -15,7 +15,7 @@
     <form method=post action=@{AdminPicturesR prodId} enctype=#{enctype}>
         ^{widget}
 
-        <input type=submit value=Ajouter la photo>
+        <input .btn type=submit value=Ajouter la photo>
 
     <h2>Photos
 

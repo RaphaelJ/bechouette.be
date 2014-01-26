@@ -33,7 +33,8 @@
 
     $if productAvailable prod
         <p .command>
-            <a .button href=@{CommandProductR prodId}>
+            <a .btn .btn-primary href=@{CommandProductR prodId}>
+                <span .glyphicon .glyphicon-shopping-cart>
                 Commander cette création
     $else
         <p .not_available>Cette création n'est plus disponible actuellement.

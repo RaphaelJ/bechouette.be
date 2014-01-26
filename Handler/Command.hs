@@ -10,7 +10,6 @@ import Control.Monad
 import Data.Maybe
 import Network.Mail.Mime (Address (..), simpleMail, renderSendMail)
 import Text.Blaze.Renderer.Text (renderMarkup)
-import Text.Hamlet (shamlet)
 
 data Command = Command { 
       cLastName :: Text, cFirstName :: Text, cEmail :: Text, cTel :: Maybe Text
@@ -21,13 +20,13 @@ data Command = Command {
 data ShippingMethod = OnSite | PostalDelivery deriving (Eq)
 
 -- | Propose le formulaire de commande d'un produit particulier.
-getCommandProductR :: ProductId -> Handler RepHtml
+getCommandProductR :: ProductId -> Handler Html
 getCommandProductR prodId = do
     (widget, enctype) <- generateFormPost productForm
 
     displayCommandProduct prodId widget enctype
 
-postCommandProductR :: ProductId -> Handler RepHtml
+postCommandProductR :: ProductId -> Handler Html
 postCommandProductR prodId = do
     ((res, widget), enctype) <- runFormPost productForm
 
@@ -37,7 +36,7 @@ postCommandProductR prodId = do
             redirect CommandConfirmR
         _               -> displayCommandProduct prodId widget enctype
 
-displayCommandProduct :: ProductId -> Widget -> Enctype -> Handler RepHtml
+displayCommandProduct :: ProductId -> Widget -> Enctype -> Handler Html
 displayCommandProduct prodId widget enctype = do
     (prod, mPic) <- runDB $ (,) <$> get404 prodId
                                 <*> (selectFirst [PictureProduct ==. prodId]
@@ -55,13 +54,13 @@ displayCommandProduct prodId widget enctype = do
 -- -----------------------------------------------------------------------------
 
 -- | Propose le formulaire pour effectuer une demande personnalisée.
-getCommandSpecialR :: Handler RepHtml
+getCommandSpecialR :: Handler Html
 getCommandSpecialR = do
     (widget, enctype) <- generateFormPost productForm
 
     displayCommandSpecial widget enctype
 
-postCommandSpecialR :: Handler RepHtml
+postCommandSpecialR :: Handler Html
 postCommandSpecialR = do
     ((res, widget), enctype) <- runFormPost productForm
 
@@ -71,7 +70,7 @@ postCommandSpecialR = do
             redirect CommandConfirmR
         _               -> displayCommandSpecial widget enctype
 
-displayCommandSpecial :: Widget -> Enctype -> Handler RepHtml
+displayCommandSpecial :: Widget -> Enctype -> Handler Html
 displayCommandSpecial widget enctype = do
     defaultLayout $ do
         setTitle [shamlet|Demande spéciale - Be Chouette|]
@@ -81,7 +80,7 @@ displayCommandSpecial widget enctype = do
 -- -----------------------------------------------------------------------------
 
 -- | Affiche le message de confirmation de l'envoi de la demande.
-getCommandConfirmR :: Handler RepHtml
+getCommandConfirmR :: Handler Html
 getCommandConfirmR = do
     defaultLayout $ do
         setTitle [shamlet|Confirmation de la demande - Be Chouette|]

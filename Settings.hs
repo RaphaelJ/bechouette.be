@@ -20,7 +20,7 @@ import Text.Hamlet
 import System.FilePath ((</>))
 
 -- | Which Persistent backend this site is using.
-type PersistConfig = SqliteConf
+type PersistConf = SqliteConf
 
 -- Static setting below. Changing these requires a recompile
 

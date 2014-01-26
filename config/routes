@@ -1,25 +1,34 @@
-/static StaticR                 Static getStatic
-/robots.txt                     RobotsR                 GET
+/static StaticR                         Static getStatic
+/robots.txt                             RobotsR                         GET
 
-/                               HomeR                   GET
+/                                       HomeR                           GET
 
-/product/#ProductId             ProductR                GET
+/product/#ProductId                     ProductR                        GET
 
-/command/#ProductId             CommandProductR         GET POST
-/command_spec/                  CommandSpecialR         GET POST
-/command_confirm/               CommandConfirmR         GET
+/command/#ProductId                     CommandProductR                 GET POST
+/command_spec/                          CommandSpecialR                 GET POST
+/command_confirm/                       CommandConfirmR                 GET
 
-/about                          AboutR                  GET
+/about                                  AboutR                          GET
 
-/admin                          AdminR                  GET POST
-/admin/login                    AdminLoginR             GET POST
+/admin                                  AdminLoginR                     GET POST
 
-/admin/editcat/#CategoryId      AdminEditCatR           GET POST
-/admin/removecat/#CategoryId    AdminRemoveCatR         GET
+/admin/products/                        AdminProductsR                  GET POST
+/admin/products/#ProductId              AdminEditProdR                  GET POST
+/admin/remproduct/#ProductId            AdminRemoveProdR                GET
 
-/admin/newprod/#CategoryId      AdminNewProdR           GET POST
-/admin/editprod/#ProductId      AdminEditProdR          GET POST
-/admin/removeprod/#ProductId    AdminRemoveProdR        GET
+/admin/pictures/#ProductId              AdminPicturesR                  GET POST
+/admin/rempicture/#PictureId            AdminRemovePictureR             GET
 
-/admin/pictures/#ProductId      AdminPicturesR          GET POST
-/admin/rempicture/#PictureId    AdminRemovePictureR     GET
+/admin/cats                             AdminCatsR                      GET POST
+/admin/cats/#CategoryId                 AdminEditCatR                   GET POST
+/admin/remcat/#CategoryId               AdminRemoveCatR                 GET
+/admin/newsubcat/#CategoryId            AdminNewSubCatR                 GET POST
+/admin/subcat/#SubCategoryId            AdminEditSubCatR                GET POST
+/admin/remsubcat/#SubCategoryId         AdminRemoveSubCatR              GET
+/admin/remscprod/#SubCategoryId#ProductId AdminRemoveSubCatProdR        GET
+
+/admin/birthlists/                      AdminBirthListsR                GET POST
+/admin/birthlists/#BirthListId          AdminEditBirthListR             GET POST
+/admin/rembirthlist/#BirthListId        AdminRemoveBirthListR           GET
+/admin/remblpro/#BirthListId/#ProductId AdminRemoveBirthListProdR       GET

@@ -7,4 +7,4 @@
         <table>
             ^{widget}
 
-        <input type=submit value="Modifier le produit">
+        <input .btn type=submit value="Modifier le produit">

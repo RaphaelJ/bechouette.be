@@ -1,3 +1,87 @@
 $maybe msg <- mmsg
     <div #message>#{msg}
-^{widget}
+
+<div .container .page-container>
+    <nav .navbar role="navigation">
+        <div .navbar-header>
+            <button type="button" .navbar-toggle data-toggle="collapse"
+                    data-target="#navbar-collapse">
+                <span .sr-only>Toggle navigation</span>
+                <span .icon-bar>
+                <span .icon-bar>
+                <span .icon-bar>
+
+            <a .navbar-brand href=@{HomeR}>
+                <img alt=Logo src=@{StaticR img_logo_png}/>
+
+        <div .collapse .navbar-collapse .navbar-left #navbar-collapse>
+            <ul .nav .navbar-nav>
+                $maybe route <- currentRoute
+                    $case route
+                        $of HomeR
+                            <li>
+                                <a href=@{HomeR} .enabled>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR}>Listes de naissance
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of ProductR _
+                            <li>
+                                <a href=@{HomeR} .enabled>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of CommandProductR _
+                            <li>
+                                <a href=@{HomeR} .enabled>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of CommandSpecialR
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR} .enabled>
+                                    Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of AboutR
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR} .enabled>
+                                    A propos de Be Chouette
+                        $of _
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                $nothing
+                    <li>
+                        <a href=@{HomeR}>Catalogue
+                    <li>
+                        <a href=@{CommandSpecialR}>Demande spéciale
+                    <li>
+                        <a href=@{AboutR}>A propos de Be Chouette
+
+        <div .description>
+            Catalogue home-made de vêtements et articles pour petits et grands enfants
+
+    ^{widget}
+
+    <footer>
+        <a .facebook href=https://www.facebook.com/BeChouette target=_BLANK>
+            <span .glyphicon .glyphicon-globe>
+            Suivez notre page Facebook !
+        &nbsp;• © 2013 Be Chouette
+        &nbsp;• Site web par&nbsp;
+        <a href="https://github.com/RaphaelJ/bechouette.be">
+            Raphael Javaux
