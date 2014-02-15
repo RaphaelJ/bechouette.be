@@ -82,8 +82,8 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             addStylesheetRemote "//fonts.googleapis.com/css?family=Lato:100italic,100,300italic,300,400italic,400,700italic,700,900italic,900"
-            addStylesheetRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
             addScriptRemote "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"
+            addStylesheetRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
             addScriptRemote "//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"
 
             $(widgetFile "default-layout")

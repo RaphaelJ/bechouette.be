@@ -6,12 +6,14 @@ Category
 SubCategory
     category                    CategoryId
     name                        Text
+    shortDesc                   Text
+    mainProduct                 ProductId Maybe
+    top                         Bool
     UniqueSubCategoryName       category name
 
 SubCategoryProduct
     subCategory                 SubCategoryId
     product                     ProductId
-    top                         Bool
     UniqueSubCategoryProduct    subCategory product
 
 BirthList

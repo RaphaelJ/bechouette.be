@@ -13,3 +13,14 @@
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
 
+    <h2>Modification du produit « #{productName prod} »
+
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            <strong>#{msg}
+
+    <form method=post action=@{AdminProductR prodId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Modifier le produit">

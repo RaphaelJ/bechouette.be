@@ -1,0 +1,44 @@
+<div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li .active>
+            <a href=@{AdminProductsR}>
+                Produits
+        <li>
+            <a href=@{AdminCatsR}>
+                Catalogue
+        <li>
+            <a href=@{AdminBirthListsR}>
+                Listes de naissance
+
+    <h1>Photos du produit « #{productName prod} »
+
+    <h2>Ajouter une nouvelle photo
+
+    <div .alert .alert-info>
+        La première photo ajoutée sera utilisée pour illustrer le catalogue.
+
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            #{msg}
+
+    <form method=post action=@{AdminPicturesR prodId} enctype=#{enctype}>
+        ^{widget}
+
+        <input .btn-primary type=submit value=Ajouter la photo>
+
+    <h2>Photos
+
+    <ul>
+        $forall (Entity picId pic) <- pics
+         $with picExt <- pictureExtension pic
+            <li>
+                <div .thumbnail">
+                    <img src=@{routePicture picId PicSmall picExt}
+                         alt=Photo>
+                    <div .caption>
+                        <a href=@{AdminRemovePictureR picId}>
+                            <span .glyphicon .glyphicon-remove>
+                            Supprimer

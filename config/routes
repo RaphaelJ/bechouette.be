@@ -14,19 +14,21 @@
 /admin                                  AdminLoginR                     GET POST
 
 /admin/products/                        AdminProductsR                  GET POST
-/admin/products/#ProductId              AdminEditProdR                  GET POST
-/admin/remproduct/#ProductId            AdminRemoveProdR                GET
+/admin/products/#ProductId              AdminProductR                   GET POST
+/admin/products/#ProductId/remove       AdminProductRemoveR             GET
 
 /admin/pictures/#ProductId              AdminPicturesR                  GET POST
-/admin/rempicture/#PictureId            AdminRemovePictureR             GET
+/admin/rempicture/#PictureId            AdminPictureRemoveR             GET
 
-/admin/cats                             AdminCatsR                      GET POST
-/admin/cats/#CategoryId                 AdminEditCatR                   GET POST
-/admin/remcat/#CategoryId               AdminRemoveCatR                 GET
-/admin/newsubcat/#CategoryId            AdminNewSubCatR                 GET POST
-/admin/subcat/#SubCategoryId            AdminEditSubCatR                GET POST
-/admin/remsubcat/#SubCategoryId         AdminRemoveSubCatR              GET
-/admin/remscprod/#SubCategoryId#ProductId AdminRemoveSubCatProdR        GET
+/admin/categories                       AdminCategoriesR                GET POST
+/admin/categories/#CategoryId           AdminCategoryR                  GET POST
+/admin/remcategory/#CategoryId          AdminCategoryRemoveR            GET
+
+/admin/newsubcat/#CategoryId            AdminSubCatNewR                 GET POST
+/admin/subcat/#SubCategoryId            AdminSubCatR                    GET POST
+/admin/subcat/#SubCategoryId/remove     AdminSubCatRemoveR              GET
+/admin/subcat/#SubCategoryId/addprod/#ProductId AdminSubCatAddProdR     POST
+/admin/subcat/#SubCategoryId/remprof/#ProductId AdminSubCatRemProdR     GET
 
 /admin/birthlists/                      AdminBirthListsR                GET POST
 /admin/birthlists/#BirthListId          AdminEditBirthListR             GET POST

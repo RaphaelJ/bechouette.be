@@ -3,13 +3,20 @@
         <h1>Administration
 
     <ul .nav .nav-tabs>
-        <li .active>
+        <li>
             <a href=@{AdminProductsR}>
                 Produits
-        <li>
+        <li .active>
             <a href=@{AdminCatsR}>
                 Catalogue
         <li>
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
 
+    <h2>Modification de la catégorie « #{categoryName cat} »
+
+    <form method=post action=@{AdminEditCatR catId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Modifier la catégorie">

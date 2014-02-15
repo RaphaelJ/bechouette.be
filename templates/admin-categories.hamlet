@@ -1,0 +1,59 @@
+<div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li>
+            <a href=@{AdminProductsR}>
+                Produits
+        <li .active>
+            <a href=@{AdminCatsR}>
+                Catalogue
+        <li>
+            <a href=@{AdminBirthListsR}>
+                Listes de naissance
+
+    <h2>Ajouter une nouvelle catégorie
+
+    $maybe msg <- err
+        <p>
+            <strong>#{msg}
+
+    <form role=form method=post action=@{AdminR} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Ajouter la catégorie">
+
+    <h2>Catégories existantes
+
+    $forall (Entity catId cat, subcats) <- cats
+        <h3>#{categoryName cat} (ordre : #{categoryOrder cat})
+
+        <a href=@{AdminSubCatNewR catId}>
+            <span .glyphicon .glyphicon-plus>
+            Ajouter une sous-catégorie
+        •
+        <a href=@{AdminCategoryR catId}>
+            <span .glyphicon .glyphicon-edit>
+            Modifier cette catégorie
+        •
+        <a href=@{AdminCategoryRemoveR catId}
+           onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">
+            <span .glyphicon .glyphicon-remove>
+            Supprimer cette catégorie et ses produits
+
+        <ul>
+            $forall (Entity subCatId subCat, _) <- subCats
+                <li>
+                    <p>
+                        <strong>#{subCategoryName subCat}
+
+                    <a href=@{AdminSubCatR subCatId}>
+                        <span .glyphicon .glyphicon-edit>
+                        Gérer les produits de cette sous-catégorie
+                    •
+                    <a href=@{AdminSubCatRemoveR subCatId}
+                       onclick="return confirm('Etes-vous certain de vouloir supprimer cette sous-catégorie');">
+                        <span .glyphicon .glyphicon-remove>
+                        Supprimer cette sous-catégorie

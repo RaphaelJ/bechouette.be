@@ -1,0 +1,47 @@
+<div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li .active>
+            <a href=@{AdminProductsR}>
+                Produits
+        <li>
+            <a href=@{AdminCatsR}>
+                Catalogue
+        <li>
+            <a href=@{AdminBirthListsR}>
+                Listes de naissance
+
+    <h2>Ajouter un nouveau produit
+
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            <strong>#{msg}
+
+    <form role=form method=post action=@{AdminProductsR} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Ajouter le produit">
+
+    <h2>Produits existants
+
+    <ul>
+        $forall (Entity prodId prod, _) <- prods
+            <li>
+                <p>
+                    <strong>#{productName prod}
+
+                <a href=@{AdminProductR prodId}>
+                    <span .glyphicon .glyphicon-edit>
+                    Modifier ce produit
+                •
+                <a href=@{AdminPicturesR prodId}>
+                    <span .glyphicon .glyphicon-picture>
+                    Gérer les photos de ce produit
+                •
+                <a href=@{AdminProductRemoveR prodId}
+                    onclick="return confirm('Etes-vous certain de vouloir supprimer le produit');">
+                    <span .glyphicon .glyphicon-remove>
+                    Supprimer ce produit

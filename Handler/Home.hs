@@ -1,38 +1,44 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Handler.Home (getHomeR, listProducts) where
+module Handler.Home (getHomeR, subCatPic, productPic) where
 
 import Import
 import Control.Monad
 
 getHomeR :: Handler Html
 getHomeR = do
-    (topProds, cats) <- runDB $ do
-        topProds <- listTopProds
-        cats <- listProducts
-        return (zip [(1 :: Int)..] topProds, cats)
+    (topSubCats, cats) <- runDB $ do
+        topSubCats <- listTopSubCats
+        cats       <- listCats
+        return (zip [(0 :: Int)..] topSubCats, cats)
 
     defaultLayout $ do
         setTitle "Créations - Be Chouette"
         $(widgetFile "home")
 
-listTopProds :: YesodDB App [(Entity Product, Maybe (Entity Picture))]
-listTopProds = do
-    prods <- selectList [ProductTop ==. True] [Asc ProductName]
-    forM prods $ \prod@(Entity prodId _) -> do
-        mPic <- getPic prodId
-        return (prod, mPic)
+listTopSubCats :: YesodDB App [(Entity Product, Maybe (Entity Picture))]
+listTopSubCats = do
+    subCats <- selectList [SubCategoryTop ==. True] []
+    forM subCats $ \subCatEntity@(Entity _ subCat) -> do
+        mPic <- subCatPic subCat
+        return (subCatEntity, mPic)
 
-listProducts :: YesodDB App [
-      (Entity Category, [(Entity Product, Maybe (Entity Picture))])
+listCats :: YesodDB App [
+      (Entity Category, [(Entity SubCategory, Maybe (Entity Picture))])
     ]
-listProducts = do
+listCats = do
     cats <- selectList [] [Asc CategoryOrder, Asc CategoryName]
     forM cats $ \cat@(Entity catId _) -> do
-        prods <- selectList [ProductCategory ==. catId] [Asc ProductName]
-        prodsPics <- forM prods $ \prod@(Entity prodId _) -> do
-            mPic <- getPic prodId
-            return (prod, mPic)
-        return (cat, prodsPics)
+        subCats <- selectList [ProductCategory ==. catId] [Asc ProductName]
+        subCatsPics <- forM subCats $ \subCatEntity@(Entity _ subCat) -> do
+            mPic <- subCatPic subCat
+            return (subCatEntity, mPic)
+        return (cat, subCatsPics)
 
-getPic :: ProductId -> YesodDB App (Maybe (Entity Picture))
-getPic prodId = selectFirst [PictureProduct ==. prodId] [Asc PictureId]
+subCatPic :: Entity SubCategory -> YesodDB App (Maybe (Entity Picture))
+subCatPic subCat
+    | Just prodId <- subCategoryMainProduct subCat = productPic prodId
+    | otherwise                                    = return Nothing
+
+-- | Retourne la première image du produit.
+productPic :: ProductId -> YesodDB App (Maybe (Entity Picture))
+productPic prodId = selectFirst [PictureProduct ==. prodId] [Asc PictureId]

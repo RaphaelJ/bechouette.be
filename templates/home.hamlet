@@ -2,11 +2,10 @@
     <!-- Indicators -->
     <ol .carousel-indicators>
         $forall (i, _) <- topProds
-            $if i == 1
+            $if i == 0
                 <li data-target=#carousel-products data-slide-to=0 .active>
             $else
-                $with i' <- i - 1
-                 <li data-target=#carousel-products data-slide-to=#{i'}>
+                <li data-target=#carousel-products data-slide-to=#{i}>
 
     <!-- Wrapper for slides -->
     <div .carousel-inner>
