@@ -329,6 +329,7 @@ getAdminCategoryR catId = do
 
     (widget, enctype) <- generateFormPost $ categoryForm (Just cat)
 
+    let err = Nothing
     defaultLayout $ do
         setTitle "Modifier une catégorie - Be Chouette"
         $(widgetFile "admin-category")
@@ -339,16 +340,29 @@ postAdminCategoryR catId = do
 
     cat <- runDB $ get404 catId
 
-    ((result, widget), enctype) <- runFormPost $ categoryForm (Just cat)
+    ((result, widget), enctype) <- runFormPost $ categoryForm Nothing
 
-    case result of
-        FormSuccess newCat -> do
-            _ <- runDB $ insert catId newCat
-            redirect AdminCategoriesR
-        _ -> do
+    err <- case result of
+        FormSuccess cat' -> do
+            m <- runDB $
+                -- Teste si une catégorie du même nom existe.
+                mCatName <- getBy $ CategoryName $ categoryName cat'
+                case mCatName of
+                    Just (Entity catNameId _) | catNameId /= catId ->
+                        return $! Just ("Nom de catégorie existant." :: Text)
+                    _                                              -> do
+                        runDB $ update catId cat'
+                        return Nothing
+        _                ->
+            return Nothing
+
+    case err of
+        Just _ -> do
             defaultLayout $ do
                 setTitle "Modifier une catégorie - Be Chouette"
                 $(widgetFile "admin-category")
+        Nothing ->
+            redirect AdminCategoriesR
 
 getAdminCategoryRemoveR :: CategoryId -> Handler ()
 getAdminCategoryRemoveR catId = do
@@ -391,25 +405,61 @@ postAdminSubCatNewR catId = do
 
     ((result, widget), enctype) <- runFormPost $ subCatForm catId [] Nothing
 
-    case result of
-        FormSuccess newCat -> do
-            _ <- runDB $ replace catId newCat
-            redirect AdminCategoriesR
-        _ -> do
+    err <- case result of
+        FormSuccess subCat -> do
+            m <- runDB $ insertUnique subCat
+            case m of
+                Just _  -> return $! Just ("Nom de catégorie existant." :: Text)
+                Nothing -> return Nothing
+        _                  ->
+            return Nothing
+
+    case err of
+        Just _ ->
             defaultLayout $ do
                 setTitle "Ajouter une sous-catégorie - Be Chouette"
-                $(widgetFile "admin-category")
-                
-                
-                
+                $(widgetFile "admin-subcategory")
+        Nothing ->
+            redirect AdminCategoriesR
 
-    runDB $ do
-        subCat   <- get subCatId
-        products <- selectList [SubCategoryProductSubCategory ==. subCatId] []
+getAdminSubCatR :: SubCategoryId -> Handler Html
+getAdminSubCatR subCatId = do
+    redirectIfNotConnected
 
-        forM_ subCats (delete . entityKey)
+    subCat <- runDB $ get404 subCatId
 
-    redirect AdminCategoriesR
+    let catId = subCategoryCategory subCat
+        err   = Nothing
+    (widget, enctype) <- generateFormPost $ subCatForm catId [] (Just subCat)
+
+    defaultLayout $ do
+        setTitle "Modifier une sous-catégorie - Be Chouette"
+        $(widgetFile "admin-subcategory")
+
+postAdminSubCatR :: CategoryId -> Handler Html
+postAdminSubCatR catId = do
+    redirectIfNotConnected
+
+    cat <- runDB $ get404 catId
+
+    ((result, widget), enctype) <- runFormPost $ subCatForm catId [] Just s
+
+    err <- case result of
+        FormSuccess subCat -> do
+            m <- runDB $ replace subCat
+            case m of
+                Just _  -> return $! Just ("Nom de catégorie existant." :: Text)
+                Nothing -> return Nothing
+        _                  ->
+            return Nothing
+
+    case err of
+        Just _ ->
+            defaultLayout $ do
+                setTitle "Ajouter une sous-catégorie - Be Chouette"
+                $(widgetFile "admin-subcategory")
+        Nothing ->
+            redirect AdminCategoriesR
 
 subCatForm :: CategoryId -> [Entity Product] -> Maybe SubCategory
            -> Form SubCategory

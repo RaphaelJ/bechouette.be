@@ -3,7 +3,7 @@
         <h1>Administration
 
     $maybe msg <- err
-        <p>
+        <div .alert .alert-danger>
             <strong>#{msg}
 
     <form method=post action=@{AdminLoginR} enctype=#{enctype}>

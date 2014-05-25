@@ -16,7 +16,7 @@
     <h2>Ajouter une nouvelle catégorie
 
     $maybe msg <- err
-        <p>
+        <div .alert .alert-danger>
             <strong>#{msg}
 
     <form role=form method=post action=@{AdminR} enctype=#{enctype}>

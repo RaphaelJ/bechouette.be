@@ -15,6 +15,10 @@
 
     <h2>Modification de la catégorie « #{categoryName cat} »
 
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            <strong>#{msg}
+
     <form method=post action=@{AdminEditCatR catId} enctype=#{enctype}>
         <table>
             ^{widget}
