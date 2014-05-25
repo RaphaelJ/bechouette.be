@@ -44,13 +44,17 @@
             Supprimer cette catégorie et ses produits
 
         <ul>
-            $forall (Entity subCatId subCat, _) <- subCats
+            $forall (Entity subCatId subCat, _) <- subcats
                 <li>
                     <p>
                         <strong>#{subCategoryName subCat}
 
                     <a href=@{AdminSubCatR subCatId}>
                         <span .glyphicon .glyphicon-edit>
+                        Modifier cette sous-catégorie
+                    •
+                    <a href=@{AdminSubCatProductsR subCatId}>
+                        <span .glyphicon .glyphicon-list>
                         Gérer les produits de cette sous-catégorie
                     •
                     <a href=@{AdminSubCatRemoveR subCatId}

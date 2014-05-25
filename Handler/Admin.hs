@@ -294,7 +294,7 @@ getAdminCategoriesR = do
 
     (widget, enctype) <- generateFormPost $ categoryForm Nothing
 
-    cats <- runDB listSubCats
+    cats <- runDB listCats
 
     defaultLayout $ do
         setTitle "Gestion des catégories - Be Chouette"
@@ -315,7 +315,7 @@ postAdminCategoriesR = do
                 Nothing -> return $! Just ("Nom de catégorie existant." :: Text)
         _               -> return Nothing
 
-    cats <- runDB listSubCats
+    cats <- runDB listCats
 
     defaultLayout $ do
         setTitle "Gestion des catégories - Be Chouette"
@@ -343,7 +343,7 @@ postAdminCategoryR catId = do
 
     case result of
         FormSuccess newCat -> do
-            _ <- runDB $ replace catId newCat
+            _ <- runDB $ insert catId newCat
             redirect AdminCategoriesR
         _ -> do
             defaultLayout $ do
@@ -356,7 +356,8 @@ getAdminCategoryRemoveR catId = do
 
     runDB $ do
         _ <- delete catId
-        subCats <- selectList [SubCategoryCategory ==. catId] []
+        subCats <- selectList [SubCategoryCategory ==. catId]
+                              [Asc SubCategoryName]
         forM_ subCats (delete . entityKey)
 
     redirect AdminCategoriesR
@@ -369,13 +370,43 @@ categoryForm cat = renderDivs $ Category
 
 -- Sous-catégories -------------------------------------------------------------
 
-getAdminSubCatNewR :: CategoryId -> Handler ()
+getAdminSubCatNewR :: CategoryId -> Handler Html
 getAdminSubCatNewR catId = do
     redirectIfNotConnected
 
+    cat <- runDB $ get404 catId
+
+    let err = Nothing
+    (widget, enctype) <- generateFormPost $ subCatForm catId [] Nothing
+
+    defaultLayout $ do
+        setTitle "Ajouter une sous-catégorie - Be Chouette"
+        $(widgetFile "admin-subcategory")
+
+postAdminSubCatNewR :: CategoryId -> Handler Html
+postAdminSubCatNewR catId = do
+    redirectIfNotConnected
+
+    cat <- runDB $ get404 catId
+
+    ((result, widget), enctype) <- runFormPost $ subCatForm catId [] Nothing
+
+    case result of
+        FormSuccess newCat -> do
+            _ <- runDB $ replace catId newCat
+            redirect AdminCategoriesR
+        _ -> do
+            defaultLayout $ do
+                setTitle "Ajouter une sous-catégorie - Be Chouette"
+                $(widgetFile "admin-category")
+                
+                
+                
+
     runDB $ do
-        _ <- delete catId
-        subCats <- selectList [SubCategoryCategory ==. catId] []
+        subCat   <- get subCatId
+        products <- selectList [SubCategoryProductSubCategory ==. subCatId] []
+
         forM_ subCats (delete . entityKey)
 
     redirect AdminCategoriesR
@@ -387,7 +418,7 @@ subCatForm catId prods subCat = renderDivs $ SubCategory catId
              (subCategoryName <$> subCat)
     <*> areq textField     "Description rapide (pour catalogue)"
              (subCategoryShortDesc <$> subCat)
-    <*> pure Nothing
+    <*> mainProductField
     <*> areq checkBoxField "Afficher en grand sur la page d'acceuil"
              (subCategoryTop <$> subCat)
   where
@@ -397,7 +428,7 @@ subCatForm catId prods subCat = renderDivs $ SubCategory catId
              "Produit principal (utilisé pour la photo)"
              (subCategoryMainProduct <$> subCat)
 
-    prods' = map (\(Entity prodId prod) -> (productName prod, prodId)) prod
+    prods' = map (\(Entity prodId prod) -> (productName prod, prodId)) prods
 
 -- -----------------------------------------------------------------------------
 
