@@ -384,6 +384,7 @@ categoryForm cat = renderDivs $ Category
 
 -- Sous-catégories -------------------------------------------------------------
 
+-- | Ajoute une nouvelle sous-catégorie.
 getAdminSubCatNewR :: CategoryId -> Handler Html
 getAdminSubCatNewR catId = do
     redirectIfNotConnected
@@ -395,7 +396,7 @@ getAdminSubCatNewR catId = do
 
     defaultLayout $ do
         setTitle "Ajouter une sous-catégorie - Be Chouette"
-        $(widgetFile "admin-subcategory")
+        $(widgetFile "admin-subcategory-new")
 
 postAdminSubCatNewR :: CategoryId -> Handler Html
 postAdminSubCatNewR catId = do
@@ -418,26 +419,26 @@ postAdminSubCatNewR catId = do
         Just _ ->
             defaultLayout $ do
                 setTitle "Ajouter une sous-catégorie - Be Chouette"
-                $(widgetFile "admin-subcategory")
+                $(widgetFile "admin-subcategor-newy")
         Nothing ->
             redirect AdminCategoriesR
 
-getAdminSubCatR :: SubCategoryId -> Handler Html
-getAdminSubCatR subCatId = do
+-- | Modifie une sous-catégorie.
+getAdminSubCatEditR :: SubCategoryId -> Handler Html
+getAdminSubCatEditR subCatId = do
     redirectIfNotConnected
 
     subCat <- runDB $ get404 subCatId
 
-    let catId = subCategoryCategory subCat
-        err   = Nothing
+    let err   = Nothing
     (widget, enctype) <- generateFormPost $ subCatForm catId [] (Just subCat)
 
     defaultLayout $ do
         setTitle "Modifier une sous-catégorie - Be Chouette"
-        $(widgetFile "admin-subcategory")
+        $(widgetFile "admin-subcategory-edit")
 
-postAdminSubCatR :: CategoryId -> Handler Html
-postAdminSubCatR catId = do
+postAdminSubCatEditR :: SubCategoryId -> Handler Html
+postAdminSubCatEditR subCatId = do
     redirectIfNotConnected
 
     cat <- runDB $ get404 catId
@@ -445,19 +446,23 @@ postAdminSubCatR catId = do
     ((result, widget), enctype) <- runFormPost $ subCatForm catId [] Just s
 
     err <- case result of
-        FormSuccess subCat -> do
-            m <- runDB $ replace subCat
-            case m of
-                Just _  -> return $! Just ("Nom de catégorie existant." :: Text)
-                Nothing -> return Nothing
+        FormSuccess subCat' -> do
+            -- Teste si une catégorie du même nom existe.
+            mSubCatName <- getBy $ SubCategoryName $ subCategoryName subCat'
+            case mSubCatName of
+                Just (Entity subCatNameId _) | subCatNameId /= subCatCatId ->
+                    return $! Just ("Nom de catégorie existant." :: Text)
+                _                                              -> do
+                    runDB $ update subCatId subCat'
+                    return Nothing
         _                  ->
             return Nothing
 
     case err of
         Just _ ->
             defaultLayout $ do
-                setTitle "Ajouter une sous-catégorie - Be Chouette"
-                $(widgetFile "admin-subcategory")
+                setTitle "Modifier une sous-catégorie - Be Chouette"
+                $(widgetFile "admin-subcategory-edit")
         Nothing ->
             redirect AdminCategoriesR
 
@@ -474,11 +479,49 @@ subCatForm catId prods subCat = renderDivs $ SubCategory catId
   where
     mainProductField | null prods = pure Nothing
                      | otherwise  =
-        aopt (selectFieldList prods')
+        aopt (selectFieldList (productNames prods))
              "Produit principal (utilisé pour la photo)"
              (subCategoryMainProduct <$> subCat)
 
-    prods' = map (\(Entity prodId prod) -> (productName prod, prodId)) prods
+-- | Liste les produits d'une sous-catégorie.
+getAdminSubCatR :: SubCategoryId -> Handler Html
+getAdminSubCatR subCatId = do
+    redirectIfNotConnected
+
+    (subCat, prods) <- runDB $
+        (, ) <$> get404 subCatId
+             <*> listSubCatProduct subCatId
+
+    (widget, enctype) <- generateFormPost $ subCatProductForm prods
+
+    defaultLayout $ do
+        setTitle "Modifier les produits d'une sous-catégorie - Be Chouette"
+        $(widgetFile "admin-subcategory-edit")
+
+-- | Supprime une sous-catégorie et ses produits.
+getAdminSubCatRemoveR :: SubCategoryId -> Handler ()
+getAdminSubCatRemoveR subCatId = do
+    redirectIfNotConnected
+
+    runDB $ do
+        delete subCatId
+
+        prods <- listSubCatProduct subCatId
+        forM_ prods $ delete . entityKey
+
+    redirect AdminCategoriesR
+
+subCatProductForm :: [Entity Product] -> Form ProductId
+subCatProductForm prods = renderDivs $
+    areq (selectFieldList (productNames prods)) "Produit" Nothing
+
+listSubCatProduct :: SubCategoryId -> YesodDB App [Entity Product]
+listSubCatProduct subCatId =
+    selectList [SubCategorySubCategory ==. subCatId]
+               [Asc SubCategoryProductProduct]
+
+productNames :: [Entity Product] -> [(Text, ProductId)]
+productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
 
 -- -----------------------------------------------------------------------------
 

@@ -1,0 +1,26 @@
+<div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li>
+            <a href=@{AdminProductsR}>
+                Produits
+        <li .active>
+            <a href=@{AdminCatsR}>
+                Catalogue
+        <li>
+            <a href=@{AdminBirthListsR}>
+                Listes de naissance
+
+    <h2>Créer une sous-catégorie de « #{categoryName cat} »
+
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            <strong>#{msg}
+
+    <form method=post action=@{AdminSubCatNewR catId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Créer">

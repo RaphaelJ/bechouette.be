@@ -13,14 +13,24 @@
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
 
-    <h2>Sous-catégorie de « #{categoryName cat} »
+    <h2>Modifier les produits de la sous-catégorie de « #{subCategoryName subCat} »
 
-    $maybe msg <- err
-        <div .alert .alert-danger>
-            <strong>#{msg}
+    <h3>Ajouter un nouveau produit
 
-    <form method=post action=@{AdminSubCatNewR catId} enctype=#{enctype}>
+    <form method=post action=@{AdminSubCatAddProdR subCatId} enctype=#{enctype}>
         <table>
             ^{widget}
 
-        <input .btn-primary type=submit value="Valider">
+        <input .btn-primary type=submit value="Ajouter">
+
+    <h3>Produits
+
+    <ul>
+        $forall (Entity prod) <- prods
+            <li>
+                <p>
+                    <strong>#{productName prod}
+
+                <a href=@{AdminSubCatRemProdR prodId}>
+                    <span .glyphicon .glyphicon-remove>
+                    Retirer ce produit

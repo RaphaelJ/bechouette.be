@@ -25,9 +25,10 @@
 /admin/remcategory/#CategoryId          AdminCategoryRemoveR            GET
 
 /admin/newsubcat/#CategoryId            AdminSubCatNewR                 GET POST
-/admin/subcat/#SubCategoryId            AdminSubCatR                    GET POST
+/admin/subcat/#SubCategoryId            AdminSubCatEditR                GET POST
+/admin/subcat/#SubCategoryId            AdminSubCatR                    GET
 /admin/subcat/#SubCategoryId/remove     AdminSubCatRemoveR              GET
-/admin/subcat/#SubCategoryId/addprod/#ProductId AdminSubCatAddProdR     POST
+/admin/subcat/#SubCategoryId/addprod/   AdminSubCatAddProdR             POST
 /admin/subcat/#SubCategoryId/remprof/#ProductId AdminSubCatRemProdR     GET
 
 /admin/birthlists/                      AdminBirthListsR                GET POST
