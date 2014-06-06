@@ -15,13 +15,17 @@
 
     <h2>Modifier les produits de la sous-catégorie de « #{subCategoryName subCat} »
 
+    <a href=@{AdminSubCatEditR subCatId}>
+        <span .glyphicon .glyphicon-edit>
+        Modifier cette sous-catégorie
+
     <h3>Ajouter un nouveau produit
 
-    <form method=post action=@{AdminSubCatAddProdR subCatId} enctype=#{enctype}>
+    <form method=post action=@{AdminSubCatR subCatId} enctype=#{enctype}>
         <table>
             ^{widget}
 
-        <input .btn-primary type=submit value="Ajouter">
+        <input .btn-primary type=submit value="Ajouter le produit">
 
     <h3>Produits
 
@@ -31,6 +35,6 @@
                 <p>
                     <strong>#{productName prod}
 
-                <a href=@{AdminSubCatRemProdR prodId}>
+                <a href=@{AdminSubCatRemProdR subCatId prodId}>
                     <span .glyphicon .glyphicon-remove>
-                    Retirer ce produit
+                    Retirer ce produit de la catégorie

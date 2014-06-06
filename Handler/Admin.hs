@@ -428,10 +428,13 @@ getAdminSubCatEditR :: SubCategoryId -> Handler Html
 getAdminSubCatEditR subCatId = do
     redirectIfNotConnected
 
-    subCat <- runDB $ get404 subCatId
+    (subCat, prods) <- runDB $
+        (,) <$> get404 subCatId
+            <*> listSubCatProducts subCatId
 
     let err   = Nothing
-    (widget, enctype) <- generateFormPost $ subCatForm catId [] (Just subCat)
+        catId = subCategoryCategory subCat
+    (widget, enctype) <- generateFormPost $ subCatForm catId prods (Just subCat)
 
     defaultLayout $ do
         setTitle "Modifier une sous-catégorie - Be Chouette"
@@ -441,9 +444,13 @@ postAdminSubCatEditR :: SubCategoryId -> Handler Html
 postAdminSubCatEditR subCatId = do
     redirectIfNotConnected
 
-    cat <- runDB $ get404 catId
+    (subCat, prods) <- runDB $
+        (,) <$> get404 subCatId
+            <*> listSubCatProducts subCatId
 
-    ((result, widget), enctype) <- runFormPost $ subCatForm catId [] Just s
+    let catId = subCategoryCategory subCat
+    ((result, widget), enctype) <- runFormPost $ subCatForm catId prods
+                                                            (Just subCat)
 
     err <- case result of
         FormSuccess subCat' -> do
@@ -452,7 +459,7 @@ postAdminSubCatEditR subCatId = do
             case mSubCatName of
                 Just (Entity subCatNameId _) | subCatNameId /= subCatCatId ->
                     return $! Just ("Nom de catégorie existant." :: Text)
-                _                                              -> do
+                _                                                          -> do
                     runDB $ update subCatId subCat'
                     return Nothing
         _                  ->
@@ -490,9 +497,28 @@ getAdminSubCatR subCatId = do
 
     (subCat, prods) <- runDB $
         (, ) <$> get404 subCatId
-             <*> listSubCatProduct subCatId
+             <*> listSubCatProducts subCatId
 
     (widget, enctype) <- generateFormPost $ subCatProductForm prods
+
+    defaultLayout $ do
+        setTitle "Modifier les produits d'une sous-catégorie - Be Chouette"
+        $(widgetFile "admin-subcategory-edit")
+
+-- | Ajoute un produit et liste les produits d'une sous-catégorie.
+postAdminSubCatR :: SubCategoryId -> Handler Html
+postAdminSubCatR subCatId = do
+    redirectIfNotConnected
+
+    (subCat, prods) <- runDB $
+        (, ) <$> get404 subCatId
+             <*> listSubCatProducts subCatId
+
+    ((result, widget), enctype) <- runFormPost $ subCatProductForm prods
+
+    case result of
+        FormSuccess prodId -> insertUnique $ SubCategoryProduct subCatId prodId
+        _                  -> return ()
 
     defaultLayout $ do
         setTitle "Modifier les produits d'une sous-catégorie - Be Chouette"
@@ -504,26 +530,48 @@ getAdminSubCatRemoveR subCatId = do
     redirectIfNotConnected
 
     runDB $ do
+        _ <- get404 subCatId
         delete subCatId
 
-        prods <- listSubCatProduct subCatId
+        prods <- listSubCatProducts subCatId
         forM_ prods $ delete . entityKey
 
     redirect AdminCategoriesR
+
+-- | Supprime un produit de la sous catégorie.
+getAdminSubCatRemProdR :: SubCategoryId -> SubCategoryProductId -> Handler ()
+getAdminSubCatRemProdR subCatId subCatProductId = do
+    redirectIfNotConnected
+
+    prods <- runDB $ do
+        _ <- get404 subCatId
+        delete subCatProductId
+
+    redirect (AdminSubCatR subCatId)
 
 subCatProductForm :: [Entity Product] -> Form ProductId
 subCatProductForm prods = renderDivs $
     areq (selectFieldList (productNames prods)) "Produit" Nothing
 
-listSubCatProduct :: SubCategoryId -> YesodDB App [Entity Product]
-listSubCatProduct subCatId =
-    selectList [SubCategorySubCategory ==. subCatId]
-               [Asc SubCategoryProductProduct]
+listSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
+listSubCatProducts subCatId =
+    subCatProds <- selectList [SubCategorySubCategory ==. subCatId] []
+
+    selectList [ProductId <-. map subCategoryProductProduct subCatProds]
+               [Asc ProductaName]
+
+listNotSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
+listNotSubCatProducts subCatId =
+    subCatProds <- selectList [SubCategorySubCategory ==. subCatId] []
+
+    selectList [ProductId /<-. map subCategoryProductProduct subCatProds]
+               [Asc ProductaName]
 
 productNames :: [Entity Product] -> [(Text, ProductId)]
 productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
 
--- -----------------------------------------------------------------------------
+-- Listes de naissance ---------------------------------------------------------
+
 
 
 -- -----------------------------------------------------------------------------
