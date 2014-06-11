@@ -554,25 +554,51 @@ subCatProductForm prods = renderDivs $
     areq (selectFieldList (productNames prods)) "Produit" Nothing
 
 listSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
-listSubCatProducts subCatId =
-    subCatProds <- selectList [SubCategorySubCategory ==. subCatId] []
+listSubCatProducts subCatId = do
+    subCatProds <- selectList [SubCategoryProductSubCategory ==. subCatId] []
 
     selectList [ProductId <-. map subCategoryProductProduct subCatProds]
-               [Asc ProductaName]
+               [Asc ProductName]
 
 listNotSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
-listNotSubCatProducts subCatId =
-    subCatProds <- selectList [SubCategorySubCategory ==. subCatId] []
+listNotSubCatProducts subCatId = do
+    subCatProds <- selectList [SubCategoryProductSubCategory ==. subCatId] []
 
     selectList [ProductId /<-. map subCategoryProductProduct subCatProds]
-               [Asc ProductaName]
+               [Asc ProductName]
 
 productNames :: [Entity Product] -> [(Text, ProductId)]
 productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
 
 -- Listes de naissance ---------------------------------------------------------
 
+getAdminBirthListsR :: BirthListId -> Handler Html
+getAdminBirthListsR blId = do
+    redirectIfNotConnected
 
+    (widget, enctype) <- generateFormPost $ birthlistForm [] Nothing
+
+    let err = Nothing
+    defaultLayout $ do
+        setTitle "Gérer les listes de naissance - Be Chouette"
+        $(widgetFile "admin-birthlists")
+
+birthlistForm :: [Entity Product] -> Maybe BirthList -> Form BirthList
+birthlistForm prods bl = renderDivs $ BirthList
+    <$> areq textField "Nom de la liste de naissance" (birthListyName <$> bl)
+  where
+    mainProductField | null prods = pure Nothing
+                     | otherwise  =
+        aopt (selectFieldList (productNames prods))
+             "Produit principal (utilisé pour la photo)"
+             (birthListMainProduct <$> bl)
+
+listBirthListProducts :: SubCategoryId -> YesodDB App [Entity Product]
+listBirthListProducts blId = do
+    blProds <- selectList [BirthListId ==. blId] []
+
+    selectList [ProductId <-. map birthListProductProduct blProds]
+               [Asc ProductName]
 
 -- -----------------------------------------------------------------------------
 
