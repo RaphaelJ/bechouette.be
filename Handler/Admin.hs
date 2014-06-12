@@ -572,6 +572,7 @@ productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
 
 -- Listes de naissance ---------------------------------------------------------
 
+-- | Lister et ajouter des listes de naissance.
 getAdminBirthListsR :: BirthListId -> Handler Html
 getAdminBirthListsR blId = do
     redirectIfNotConnected
@@ -582,6 +583,14 @@ getAdminBirthListsR blId = do
     defaultLayout $ do
         setTitle "Gérer les listes de naissance - Be Chouette"
         $(widgetFile "admin-birthlists")
+
+postAdminBirthListR :: BirthList -> Handler Html
+postAdminBirthListR blId = do
+    redirectIfNotConnected
+
+    ((result, widget), enctype) <- runFormPost $ birthlistForm [] Nothing
+
+    
 
 birthlistForm :: [Entity Product] -> Maybe BirthList -> Form BirthList
 birthlistForm prods bl = renderDivs $ BirthList
