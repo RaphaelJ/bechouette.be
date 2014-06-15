@@ -23,6 +23,7 @@ import Vision.Primitive (Z (..), (:.) (..), Rect (..))
 import Text.Printf
 
 import Handler.Home (listProducts)
+import Handler.BirthLists (listBirthLists)
 
 sessionKey :: Text
 sessionKey = "CONNECTED"
@@ -95,14 +96,12 @@ postAdminProductsR = do
             m <- runDB $ insertUnique prod
             case m of
                 Just _  -> return $! Just ("Nom de produit existant." :: Text)
-                Nothing -> return Nothing
+                Nothing -> redirect AdminProductsR
         _               -> return Nothing
 
-    case err of
-        Just _ -> defaultLayout $ do
-                    setTitle "Ajouter un nouveau produit - Be Chouette"
-                    $(widgetFile "admin-products")
-        Nothing -> redirect AdminProductsR
+    defaultLayout $ do
+        setTitle "Ajouter un nouveau produit - Be Chouette"
+        $(widgetFile "admin-products")
 
 getAdminEditProdR :: ProductId -> Handler Html
 getAdminEditProdR prodId = do
@@ -321,6 +320,7 @@ postAdminCategoriesR = do
         setTitle "Gestion des catégories - Be Chouette"
         $(widgetFile "admin-categories")
 
+-- | Modifier une catégorie.
 getAdminCategoryR :: CategoryId -> Handler Html
 getAdminCategoryR catId = do
     redirectIfNotConnected
@@ -411,19 +411,14 @@ postAdminSubCatNewR catId = do
             m <- runDB $ insertUnique subCat
             case m of
                 Just _  -> return $! Just ("Nom de catégorie existant." :: Text)
-                Nothing -> return Nothing
-        _                  ->
-            return Nothing
+                Nothing ->  redirect AdminCategoriesR
+        _                  -> return Nothing
 
-    case err of
-        Just _ ->
-            defaultLayout $ do
-                setTitle "Ajouter une sous-catégorie - Be Chouette"
-                $(widgetFile "admin-subcategor-newy")
-        Nothing ->
-            redirect AdminCategoriesR
+    defaultLayout $ do
+        setTitle "Ajouter une sous-catégorie - Be Chouette"
+        $(widgetFile "admin-subcategory-new")
 
--- | Modifie une sous-catégorie.
+-- | Modifie le nom et l'article principal d'une sous-catégorie.
 getAdminSubCatEditR :: SubCategoryId -> Handler Html
 getAdminSubCatEditR subCatId = do
     redirectIfNotConnected
@@ -461,17 +456,12 @@ postAdminSubCatEditR subCatId = do
                     return $! Just ("Nom de catégorie existant." :: Text)
                 _                                                          -> do
                     runDB $ update subCatId subCat'
-                    return Nothing
-        _                  ->
-            return Nothing
+                    redirect AdminCategoriesR
+        _                   -> return Nothing
 
-    case err of
-        Just _ ->
-            defaultLayout $ do
-                setTitle "Modifier une sous-catégorie - Be Chouette"
-                $(widgetFile "admin-subcategory-edit")
-        Nothing ->
-            redirect AdminCategoriesR
+    defaultLayout $ do
+        setTitle "Modifier une sous-catégorie - Be Chouette"
+        $(widgetFile "admin-subcategory-edit")
 
 subCatForm :: CategoryId -> [Entity Product] -> Maybe SubCategory
            -> Form SubCategory
@@ -497,13 +487,13 @@ getAdminSubCatR subCatId = do
 
     (subCat, prods) <- runDB $
         (, ) <$> get404 subCatId
-             <*> listSubCatProducts subCatId
+             <*> listNotSubCatProducts subCatId
 
-    (widget, enctype) <- generateFormPost $ subCatProductForm prods
+    (widget, enctype) <- generateFormPost $ productSelectionForm prods
 
     defaultLayout $ do
         setTitle "Modifier les produits d'une sous-catégorie - Be Chouette"
-        $(widgetFile "admin-subcategory-edit")
+        $(widgetFile "admin-subcategory")
 
 -- | Ajoute un produit et liste les produits d'une sous-catégorie.
 postAdminSubCatR :: SubCategoryId -> Handler Html
@@ -512,9 +502,9 @@ postAdminSubCatR subCatId = do
 
     (subCat, prods) <- runDB $
         (, ) <$> get404 subCatId
-             <*> listSubCatProducts subCatId
+             <*> listNotSubCatProducts subCatId
 
-    ((result, widget), enctype) <- runFormPost $ subCatProductForm prods
+    ((result, widget), enctype) <- runFormPost $ productSelectionForm prods
 
     case result of
         FormSuccess prodId -> insertUnique $ SubCategoryProduct subCatId prodId
@@ -522,7 +512,7 @@ postAdminSubCatR subCatId = do
 
     defaultLayout $ do
         setTitle "Modifier les produits d'une sous-catégorie - Be Chouette"
-        $(widgetFile "admin-subcategory-edit")
+        $(widgetFile "admin-subcategory")
 
 -- | Supprime une sous-catégorie et ses produits.
 getAdminSubCatRemoveR :: SubCategoryId -> Handler ()
@@ -544,14 +534,13 @@ getAdminSubCatRemProdR subCatId subCatProductId = do
     redirectIfNotConnected
 
     prods <- runDB $ do
-        _ <- get404 subCatId
+        subCat <- get404 subCatId
         delete subCatProductId
 
-    redirect (AdminSubCatR subCatId)
+        when (subCategoryMainProduct subCat == Just subCatProductId) $
+            update subCatId subCat { subCategoryMainProduct = Nothing }
 
-subCatProductForm :: [Entity Product] -> Form ProductId
-subCatProductForm prods = renderDivs $
-    areq (selectFieldList (productNames prods)) "Produit" Nothing
+    redirect (AdminSubCatR subCatId)
 
 listSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
 listSubCatProducts subCatId = do
@@ -567,30 +556,83 @@ listNotSubCatProducts subCatId = do
     selectList [ProductId /<-. map subCategoryProductProduct subCatProds]
                [Asc ProductName]
 
-productNames :: [Entity Product] -> [(Text, ProductId)]
-productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
-
 -- Listes de naissance ---------------------------------------------------------
 
 -- | Lister et ajouter des listes de naissance.
-getAdminBirthListsR :: BirthListId -> Handler Html
-getAdminBirthListsR blId = do
+getAdminBirthListsR :: Handler Html
+getAdminBirthListsR = do
     redirectIfNotConnected
 
     (widget, enctype) <- generateFormPost $ birthlistForm [] Nothing
+
+    bls <- runDB $ listBirthLists
 
     let err = Nothing
     defaultLayout $ do
         setTitle "Gérer les listes de naissance - Be Chouette"
         $(widgetFile "admin-birthlists")
 
-postAdminBirthListR :: BirthList -> Handler Html
-postAdminBirthListR blId = do
+postAdminBirthListR :: Handler Html
+postAdminBirthListR = do
     redirectIfNotConnected
 
     ((result, widget), enctype) <- runFormPost $ birthlistForm [] Nothing
 
-    
+    err <- case result of
+        FormSuccess bl -> do
+            m <- runDB $ insertUnique bl
+            case m of
+                Just _  -> return $! Just ("Nom de liste existant." :: Text)
+                Nothing -> redirect AdminBirthListR
+        _               -> return Nothing
+
+    bls <- runDB $ listBirthLists
+
+    defaultLayout $ do
+        setTitle "Gérer les listes de naissance - Be Chouette"
+        $(widgetFile "admin-birthlists")
+
+-- | Modifie le nom et l'article principal d'une liste de naissance.
+getAdminBirthListEditR :: BirthListId -> Handler Html
+getAdminBirthListEditR blId = do
+    redirectIfNotConnected
+
+    (bl, prods) <- runDB $
+        (,) <$> get404 blId
+            <*> listBirthListProducts subCatId
+
+    let err   = Nothing
+    (widget, enctype) <- generateFormPost $ birthlistForm prods (Just bl)
+
+    defaultLayout $ do
+        setTitle "Modifier une liste de naissance - Be Chouette"
+        $(widgetFile "admin-birthlist-edit")
+
+postAdminBirthListEditR :: BirthListId -> Handler Html
+postAdminBirthListEditR blId = do
+    redirectIfNotConnected
+
+    (bl, prods) <- runDB $
+        (,) <$> get404 blId
+            <*> listBirthListProducts blId
+
+    ((result, widget), enctype) <- runFormPost $ birthlistForm prods (Just bl)
+
+    err <- case result of
+        FormSuccess bl' -> do
+            -- Teste si une liste du même nom existe.
+            mBlName <- getBy $ BirthListName $ birthListName bl'
+            case mBlName of
+                Just (Entity blNameId _) | blNameId /= blId ->
+                    return $! Just ("Nom de liste existant." :: Text)
+                _                                           -> do
+                    runDB $ update blId bl'
+                    redirect AdminBirthListsR
+        _               -> return Nothing
+
+    defaultLayout $ do
+        setTitle "Modifier une liste de naissance - Be Chouette"
+        $(widgetFile "admin-birthlist-edit")
 
 birthlistForm :: [Entity Product] -> Maybe BirthList -> Form BirthList
 birthlistForm prods bl = renderDivs $ BirthList
@@ -602,6 +644,82 @@ birthlistForm prods bl = renderDivs $ BirthList
              "Produit principal (utilisé pour la photo)"
              (birthListMainProduct <$> bl)
 
+-- | Liste les produits d'une liste de naissance.
+getAdminBirthListR :: BirthListId -> Handler Html
+getAdminBirthListR blId = do
+    redirectIfNotConnected
+
+    (bl, prods) <- runDB $
+        (, ) <$> get404 blId
+             <*> listNotSubCatProducts subCatId
+
+    (widget, enctype) <- generateFormPost $ productSelectionForm prods
+
+    defaultLayout $ do
+        setTitle "Modifier les produits d'une liste de naissance - Be Chouette"
+        $(widgetFile "admin-birthlist")
+
+-- | Ajoute un produit et liste les produits d'une sous-catégorie.
+postAdminSubCatR :: SubCategoryId -> Handler Html
+postAdminSubCatR subCatId = do
+    redirectIfNotConnected
+
+    (subCat, prods) <- runDB $
+        (, ) <$> get404 subCatId
+             <*> listNotSubCatProducts subCatId
+
+    ((result, widget), enctype) <- runFormPost $ productSelectionForm prods
+
+    case result of
+        FormSuccess prodId -> insertUnique $ BirthListProduct blId prodId False
+        _                  -> return ()
+
+    defaultLayout $ do
+        setTitle "Modifier les produits d'une liste de naissance - Be Chouette"
+        $(widgetFile "admin-birthlist")
+
+-- | Supprime une liste de naissance et ses produits.
+getAdminBirthListRemoveR :: BirthListId -> Handler ()
+getAdminBirthListRemoveR blId = do
+    redirectIfNotConnected
+
+    runDB $ do
+        _ <- get404 blId
+        delete blId
+
+        prods <- listBirthListProducts blId
+        forM_ prods $ delete . entityKey
+
+    redirect AdminBirthListsR
+
+-- | Supprime un produit de la liste de naissance.
+getAdminSubCatRemProdR :: BirthListId -> BirthListProductId -> Handler ()
+getAdminSubCatRemProdR blId blProductId = do
+    redirectIfNotConnected
+
+    prods <- runDB $ do
+        bl <- get404 blId
+        delete blProductId
+
+        when (birthListMainProduct bl == Just blProductId) $
+            update blId bl { birthListMainProduct = Nothing }
+
+    redirect (AdminBirthListR blId)
+
+-- | Réserve un produit de la liste de naissance.
+getAdminSubCatRemProdR :: BirthListId -> BirthListProductId -> Bool
+                       -> Handler ()
+getAdminSubCatRemProdR blId blProductId reserve = do
+    redirectIfNotConnected
+
+    prods <- runDB $ do
+        bl     <- get404 blId
+        blProd <- get404 blProductId
+
+        update blProductId { birthListProductReserved = reserve }
+
+    redirect (AdminBirthListR blId)
+
 listBirthListProducts :: SubCategoryId -> YesodDB App [Entity Product]
 listBirthListProducts blId = do
     blProds <- selectList [BirthListId ==. blId] []
@@ -609,7 +727,21 @@ listBirthListProducts blId = do
     selectList [ProductId <-. map birthListProductProduct blProds]
                [Asc ProductName]
 
+listNotBirthListProducts :: BirthListId -> YesodDB App [Entity Product]
+listNotBirthListProducts blId = do
+    blProds <- selectList [BirthListId ==. blId] []
+
+    selectList [ProductId /<-. map birthListProductProduct blProds]
+               [Asc ProductName]
+
 -- -----------------------------------------------------------------------------
+
+productNames :: [Entity Product] -> [(Text, ProductId)]
+productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
+
+productSelectionForm :: [Entity Product] -> Form ProductId
+productSelectionForm prods = renderDivs $
+    areq (selectFieldList (productNames prods)) "Produit" Nothing
 
 redirectIfNotConnected :: Handler ()
 redirectIfNotConnected = do

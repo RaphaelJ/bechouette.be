@@ -31,6 +31,8 @@
 /admin/subcat/#SubCategoryId/remprod/#SubCategoryProductId AdminSubCatRemProdR     GET
 
 /admin/birthlists/                      AdminBirthListsR                GET POST
-/admin/birthlists/#BirthListId          AdminEditBirthListR             GET POST
-/admin/rembirthlist/#BirthListId        AdminRemoveBirthListR           GET
-/admin/remblpro/#BirthListId/#ProductId AdminRemoveBirthListProdR       GET
+/admin/birthlists/#BirthListId/edit     AdminBirthListEditR             GET POST
+/admin/birthlists/#BirthListId          AdminBirthListR                 GET POST
+/admin/birthlists/#BirthListId/remove   AdminRemoveBirthListR           GET
+/admin/birthlists/#BirthListId/remprod/#BirthListProductId       AdminBirthListRemProdR     GET
+/admin/birthlists/#BirthListId/reserve/#BirthListProductId/#Bool AdminBirthListReserveProdR GET

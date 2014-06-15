@@ -6,20 +6,20 @@
         <li>
             <a href=@{AdminProductsR}>
                 Produits
-        <li .active>
+        <li>
             <a href=@{AdminCatsR}>
                 Catalogue
-        <li>
+        <li .active>
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
 
-    <h2>Modifier la sous-catégorie « #{subCategoryName subCat} »
+    <h2>Modifier la liste de naissance « #{birthListName bl} »
 
     $maybe msg <- err
         <div .alert .alert-danger>
             <strong>#{msg}
 
-    <form method=post action=@{AdminSubCatEditR subCatId} enctype=#{enctype}>
+    <form method=post action=@{AdminBirthListEditR blId} enctype=#{enctype}>
         <table>
             ^{widget}
 

@@ -19,11 +19,11 @@
         <div .alert .alert-danger>
             <strong>#{msg}
 
-    <form role=form method=post action=@{AdminR} enctype=#{enctype}>
+    <form role=form method=post action=@{AdminCategoriesR} enctype=#{enctype}>
         <table>
             ^{widget}
 
-        <input .btn-primary type=submit value="Ajouter la catégorie">
+        <input .btn-primary type=submit value="Créer la catégorie">
 
     <h2>Catégories existantes
 
@@ -41,7 +41,7 @@
         <a href=@{AdminCategoryRemoveR catId}
            onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">
             <span .glyphicon .glyphicon-remove>
-            Supprimer cette catégorie et ses produits
+            Supprimer cette catégorie
 
         <ul>
             $forall (Entity subCatId subCat, _) <- subcats

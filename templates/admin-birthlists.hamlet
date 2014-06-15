@@ -1,0 +1,44 @@
+<div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li>
+            <a href=@{AdminProductsR}>
+                Produits
+        <li>
+            <a href=@{AdminCatsR}>
+                Catalogue
+        <li .active>
+            <a href=@{AdminBirthListsR}>
+                Listes de naissance
+
+    <h2>Ajouter une nouvelle liste de naissance
+
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            <strong>#{msg}
+
+    <form role=form method=post action=@{AdminBirthListsR} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Créer la liste de naissance">
+
+    <h2>Listes de naissance existantes
+
+    $forall (Entity blId bl, bls) <- bls
+        <h3>#{birthListName bl}
+
+        <a href=@{AdminBirthListR blId}>
+            <span .glyphicon .glyphicon-list>
+            Gérer les produits de cette liste
+        •
+        <a href=@{AdminBirthListEditR catId}>
+            <span .glyphicon .glyphicon-edit>
+            Modifier cette liste
+        •
+        <a href=@{AdminBirthListRemoveR catId}
+           onclick="return confirm('Etes-vous certain de vouloir supprimer la liste');">
+            <span .glyphicon .glyphicon-remove>
+            Supprimer cette liste

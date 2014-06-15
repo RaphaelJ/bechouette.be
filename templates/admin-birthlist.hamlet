@@ -1,0 +1,40 @@
+<div .page>
+    <div .page-header>
+        <h1>Administration
+
+    <ul .nav .nav-tabs>
+        <li>
+            <a href=@{AdminProductsR}>
+                Produits
+        <li>
+            <a href=@{AdminCatsR}>
+                Catalogue
+        <li .active>
+            <a href=@{AdminBirthListsR}>
+                Listes de naissance
+
+    <h2>Modifier les produits de la liste « #{birthListName bl} »
+
+    <a href=@{AdminBirthListEditR blId}>
+        <span .glyphicon .glyphicon-edit>
+        Modifier cette liste
+
+    <h3>Ajouter un nouveau produit
+
+    <form method=post action=@{AdminBirthListR blId} enctype=#{enctype}>
+        <table>
+            ^{widget}
+
+        <input .btn-primary type=submit value="Ajouter le produit">
+
+    <h3>Produits
+
+    <ul>
+        $forall (Entity prod) <- prods
+            <li>
+                <p>
+                    <strong>#{productName prod}
+
+                <a href=@{AdminBirthListRemProdR blId prodId}>
+                    <span .glyphicon .glyphicon-remove>
+                    Retirer ce produit de la liste
