@@ -30,11 +30,20 @@
     <h3>Produits
 
     <ul>
-        $forall (Entity prod) <- prods
+        $forall (Entity blProdId blProd, Entity _ prod) <- prods
             <li>
                 <p>
                     <strong>#{productName prod}
 
+                $if birthListProductReserved blProd
+                    <a href=@{AdminBirthListReserveProdR blId blProdId False}>
+                        <span .glyphicon .glyphicon-remove>
+                        Marquer ce produit comme non réservé
+                $else
+                    <a href=@{AdminBirthListReserveProdR blId blProdId True}>
+                        <span .glyphicon .glyphicon-remove>
+                        Marquer ce produit comme réservé
+                •
                 <a href=@{AdminBirthListRemProdR blId prodId}>
                     <span .glyphicon .glyphicon-remove>
                     Retirer ce produit de la liste

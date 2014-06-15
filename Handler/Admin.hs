@@ -599,7 +599,7 @@ getAdminBirthListEditR blId = do
 
     (bl, prods) <- runDB $
         (,) <$> get404 blId
-            <*> listBirthListProducts subCatId
+            <*> (map snd <$> listBirthListProducts subCatId)
 
     let err   = Nothing
     (widget, enctype) <- generateFormPost $ birthlistForm prods (Just bl)
@@ -614,7 +614,7 @@ postAdminBirthListEditR blId = do
 
     (bl, prods) <- runDB $
         (,) <$> get404 blId
-            <*> listBirthListProducts blId
+            <*> (map snd <$> listBirthListProducts blId)
 
     ((result, widget), enctype) <- runFormPost $ birthlistForm prods (Just bl)
 
@@ -651,7 +651,7 @@ getAdminBirthListR blId = do
 
     (bl, prods) <- runDB $
         (, ) <$> get404 blId
-             <*> listNotSubCatProducts subCatId
+             <*> listNotBirthListProducts blId
 
     (widget, enctype) <- generateFormPost $ productSelectionForm prods
 
@@ -659,14 +659,14 @@ getAdminBirthListR blId = do
         setTitle "Modifier les produits d'une liste de naissance - Be Chouette"
         $(widgetFile "admin-birthlist")
 
--- | Ajoute un produit et liste les produits d'une sous-catégorie.
-postAdminSubCatR :: SubCategoryId -> Handler Html
-postAdminSubCatR subCatId = do
+-- | Ajoute un produit et liste les produits d'une liste de naissance.
+postAdminBirthListR :: BirthListId -> Handler Html
+postAdminBirthListR blId = do
     redirectIfNotConnected
 
-    (subCat, prods) <- runDB $
-        (, ) <$> get404 subCatId
-             <*> listNotSubCatProducts subCatId
+    (bl, prods) <- runDB $
+        (, ) <$> get404 blId
+             <*> listNotBirthListProducts blId
 
     ((result, widget), enctype) <- runFormPost $ productSelectionForm prods
 
@@ -687,8 +687,8 @@ getAdminBirthListRemoveR blId = do
         _ <- get404 blId
         delete blId
 
-        prods <- listBirthListProducts blId
-        forM_ prods $ delete . entityKey
+        blProds <- listBirthListProducts blId
+        forM_ blProds $ delete . entityKey . fst
 
     redirect AdminBirthListsR
 
@@ -707,25 +707,26 @@ getAdminSubCatRemProdR blId blProductId = do
     redirect (AdminBirthListR blId)
 
 -- | Réserve un produit de la liste de naissance.
-getAdminSubCatRemProdR :: BirthListId -> BirthListProductId -> Bool
-                       -> Handler ()
-getAdminSubCatRemProdR blId blProductId reserve = do
+getAdminSubCatRemProdR :: BirthListId -> ProductId -> Bool -> Handler ()
+getAdminSubCatRemProdR blId blProdId reserve = do
     redirectIfNotConnected
 
     prods <- runDB $ do
         bl     <- get404 blId
-        blProd <- get404 blProductId
+        blProd <- get404 blProdId
 
-        update blProductId { birthListProductReserved = reserve }
+        update blProdId { birthListProductReserved = reserve }
 
     redirect (AdminBirthListR blId)
 
-listBirthListProducts :: SubCategoryId -> YesodDB App [Entity Product]
+listBirthListProducts :: BirthListId
+                      -> YesodDB App [(Entity BirthListProduct, Entity Product)]
 listBirthListProducts blId = do
     blProds <- selectList [BirthListId ==. blId] []
 
-    selectList [ProductId <-. map birthListProductProduct blProds]
-               [Asc ProductName]
+    forM blProds $ \blProdEntity@(Entity _ blProd) -> do
+        prod <- get (birthListProductProduct blProd)
+        return (blProdEntity, prod)
 
 listNotBirthListProducts :: BirthListId -> YesodDB App [Entity Product]
 listNotBirthListProducts blId = do
