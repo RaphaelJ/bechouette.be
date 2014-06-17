@@ -19,7 +19,7 @@
                                 $if birthListProductReserved blProd
                                     <span .price>Réservé
                                 $else
-                                    $maybe price <- productPrice currProd
+                                    $maybe price <- productPrice prod
                                         <span .price>#{price} €
                             <div .clearfix>
                 $else
@@ -36,7 +36,7 @@
                                 $if birthListProductReserved blProd
                                     <span .price>Réservé
                                 $else
-                                    $maybe price <- productPrice currProd
+                                    $maybe price <- productPrice prod
                                         <span .price>#{price} €
                             <div .clearfix>
 

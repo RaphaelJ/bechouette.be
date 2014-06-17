@@ -22,7 +22,7 @@ getHomeR = do
 
 listTopSubCats :: YesodDB App [(Entity SubCategory, Maybe (Entity Picture))]
 listTopSubCats = do
-    subCats <- selectList [SubCategoryTop ==. True] []
+    subCats <- selectList [SubCategoryTop ==. True] [Asc SubCategoryName]
     forM subCats $ \subCatEntity@(Entity _ subCat) -> do
         mPic <- subCatPic subCat
         return (subCatEntity, mPic)

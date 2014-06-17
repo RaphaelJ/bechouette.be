@@ -16,7 +16,7 @@
                             <div .info>
                                 <span .name>#{productName prod}
                                 <br />
-                                $maybe price <- productPrice currProd
+                                $maybe price <- productPrice prod
                                     <span .price>#{price} €
                                 $nothing
                                     <span .price>Prix sur demande

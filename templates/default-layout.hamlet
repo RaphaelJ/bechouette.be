@@ -49,7 +49,7 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR}>Catalogue
                             <li>
-                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                                <a href=@{BirthListsR} .enabled>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
@@ -58,7 +58,7 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR}>Catalogue
                             <li>
-                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                                <a href=@{BirthListsR} .enabled>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
@@ -67,7 +67,7 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR}>Catalogue
                             <li>
-                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                                <a href=@{BirthListsR} .enabled>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
@@ -85,7 +85,7 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR}>Catalogue
                             <li>
-                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                                <a href=@{BirthListsR} .enabled>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
