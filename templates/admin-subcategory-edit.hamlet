@@ -2,12 +2,12 @@
     <div .page-header>
         <h1>Administration
 
-    <ul .nav .nav-tabs>
+    <ul .nav .nav-tabs nav-justified>
         <li>
             <a href=@{AdminProductsR}>
                 Produits
         <li .active>
-            <a href=@{AdminCatsR}>
+            <a href=@{AdminCategoriesR}>
                 Catalogue
         <li>
             <a href=@{AdminBirthListsR}>
@@ -20,7 +20,4 @@
             <strong>#{msg}
 
     <form method=post action=@{AdminSubCatEditR subCatId} enctype=#{enctype}>
-        <table>
-            ^{widget}
-
-        <input .btn-primary type=submit value="Modifier">
+        ^{widget}

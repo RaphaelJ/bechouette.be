@@ -1,65 +1,95 @@
-<div .carrousel>
-    <div .item>
-        <img src=@{StaticR img_etiquettes_jpg} alt="Etiquettes de Be Chouette"/>
-        <div .info>
-            <h2>A propos de Be Chouette
-            <span .description>Contacts, méthodes et revendeurs.
+<div .carousel .slide>
+    <div .carousel-inner>
+        <div .item .active>
+            <img src=@{StaticR img_etiquettes_jpg} alt="A propos de Be Chouette"/>
+            <div .carousel-caption>
+                <h1>A propos de Be Chouette
+                Contacts et méthodes.
 
 <div .page>
     <div #contacts .error>
         <h3>Be Chouette
+        Vêtements et accessoires pour petits et grands enfants
 
-        <table>
-            <tr>
-                <th>Site web
-                <td><a href="@{HomeR}">@{HomeR}</a>
-            <tr>
-                <th>Email
-                <td>
-                    <a href="mailto:#{extraEmail extra}">
-                        #{extraEmail extra}
-            <tr>
-                <th>Téléphone
-                <td>04/276.48.31
+        <address>
+            <strong>Bénédicte Marchal
+            <table>
+                <tr>
+                    <th>
+                        Site web
+                    <td>
+                        <a href=@{HomeR}>@{HomeR}
 
-    <div #infos>
-        <h2>Be Chouette en pratique
+                <tr>
+                    <th>
+                        Email
+                    <td>
+                        <a href="mailto:#{extraEmail extra}">
+                            #{extraEmail extra}
 
+                <tr>
+                    <th>
+                        Téléphone
+                    <td>
+                        +32 4276 48 31
+
+        Si vous souhaitez devenir distributeur des articles Be Chouette,
+        n'hésitez pas à nous contacter afin de connaître nos tarifs et
+        conditions de vente.
+
+    <div .page-header>
+        <h1>Be Chouette en pratique
+
+    <blockquote>
         <p>
-            Parce que vous êtes nombreux(ses) à me l'avoir demandé et surtout
-            parce qu'il est tout de même grand temps que je réponde à cette
-            question ... <br />
+            Les enfants sont des énigmes lumineuses
+        <footer>
+            D. Pennac
 
-        <p>
-            <strong>Comment commander?
-            <br />
+    <p>
+        Bienvenue dans l’univers lumineux de <strong>Be Chouette</strong> !
 
-        <p>
-            La fan-page vous permet de découvrir les petites choses réalisées.
-            Si une pièce vous intéresse ou que vous avez une demande
-            particulière, voilà comment cela se passe:
+    <p>
+        Be parce qu’il y a BÉnédicte derrière tout cela,
+        <br>
+        Be parce que l’important c’est d’ « Être »,
+        <br>
+        Be parce que c’est BElge, et 100% fait main,
+        <br>
+        Chouette parce que le hibou est le premier à l’avoir inspirée,
+        <br>
+        Chouette parce que c’est le leitmotiv de toute journée.
 
-        <p>
-            1. Plusieurs moyens de me manifeseter votre intérêt pour une pièce 
-            ou l'autre... ou de me faire part de vos envies ou souhaits 
-            particuliers
+    <p>
+        L’idée de départ de Be Chouette est de proposer des vêtements et
+        accessoires pour les petits et les grands enfants en n’oubliant jamais
+        que chaque enfant est unique.
+        <br>
+        Nous proposons donc des articles en quantités limitées (petites séries)
+        ou personnalisés, créés spécialement pour vous et avec vous.
+        <br>
+        Que ce soit une robe, une trousse, un bonnet ou encore un coussin,
+        chaque article peut être personnalisé au gré de vos envies. Nous nous
+        occupons de trouver les tissus, de vous proposer quelque chose qui vous
+        puisse répondre à votre demande et c’est vous qui faites la différence
+        en choisissant vos couleurs, tissus, motifs etc.
 
-        <p>
-            - soit par un petit message privé sur la page<br />
-            - soit par téléphone: 04/276 48 31, c'est parfois encore plus simple
-            de discuter de vive voie ;-)<br />
-
-        <p>N'hésitez pas! Aucune demande n'est farfelue...
-
-        <p>
-            2. Be Chouette a démarré début septembre... donc à l'heure actuelle,
-            pas encore de point de vente. Mais mais mais!!!
-
-        <p>Vous pouvez recevoir votre commande:
-
-        <p>
-            - soit par la Poste<br />
-
-            - soit en venant la retirer à mon domicile (Neupré, région liégeoise)
-
-        <p>Et voilà!!! Donc vous l'aurez compris, n'hésitez pas...
+    <p>
+        <em>Qui se cache derrière Be Chouette ?
+        <br>
+        Née il y a une trentaine d’années dans la région liégeoise, Bénédicte
+        Marchal a toujours eu le goût du bricolage, découpage, collage etc.
+        <br>
+        Créer, inventer, imaginer font partie de son quotidien que ce soit dans
+        une cuisine ou dans son atelier. L’atelier l’a emporté et Be Chouette
+        est né.
+        <br>
+        Diplômée en histoire de l’art et archéologie, Bénédicte Marchal s’est
+        tournée vers le milieu musical dans le domaine de la pédagogie.
+        Quoi de mieux comme berceau pour la création ?
+        <br>
+        Après quelques « bidouillages » pour elle-même, quelques amies et puis
+        pour ses enfants, l’idée de lancer Be Chouette a fait petit à petit son
+        chemin.
+        <br>
+        C’est ainsi qu’en 2012, Be Chouette est né.

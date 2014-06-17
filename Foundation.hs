@@ -16,10 +16,11 @@ import Settings.StaticFiles
 import Database.Persist.Sql
 import Model
 import Settings (PersistConf, widgetFile, Extra (..))
+import System.FilePath ((</>))
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Text.Printf
-import System.FilePath ((</>))
+import Yesod.Form.Bootstrap3
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -69,7 +70,6 @@ instance Yesod App where
         "config/client_session_key.aes"
 
     defaultLayout widget = do
-        master <- getYesod
         mmsg <- getMessage
 
         currentRoute <- getCurrentRoute
@@ -145,7 +145,7 @@ getExtra = fmap (appExtra . settings) getYesod
 data PicType = PicOriginal
              | PicSmall -- 100x100
              | PicLarge -- 350x400
-             | PicWide -- 950x300
+             | PicWide -- 1170x300
              | PicCatalogue -- 300x95
 
 routePicture :: PictureId -> PicType -> Text -> Route App
@@ -173,3 +173,9 @@ picName ~(Key (PersistInt64 picId)) picType picExt =
 -- wiki:
 --
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
+
+bootstrapSubmit' :: MonadHandler m => BootstrapSubmit Text -> AForm m ()
+bootstrapSubmit' setts = bootstrapSubmit setts { bsClasses = "btn-primary"}
+
+bfs' :: Text -> FieldSettings site
+bfs' = bfs

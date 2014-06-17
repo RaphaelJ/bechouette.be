@@ -1,15 +1,22 @@
 #contacts {
     float: right;
-    margin: 40px;
+    margin: 0 25px;
+    width: 450px;
 
     h3 {
         margin: 5px;
     }
 
-    table {
-        th {
-            padding-right: 15px;
-            text-align: left;
+    address {
+        margin: 5px;
+
+        table {
+            margin-left: 15px;
+
+            th {
+                padding-right: 15px;
+                text-align: left;
+            }
         }
     }
 }

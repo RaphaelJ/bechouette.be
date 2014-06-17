@@ -3,11 +3,17 @@
 
 /                                       HomeR                           GET
 
-/product/#ProductId                     ProductR                        GET
+/catalog/#SubCategoryId                 SubCategoryR                    GET
+/catalog/#SubCategoryId/#SubCategoryProductId SubCategoryProductR       GET
 
-/command/#ProductId                     CommandProductR                 GET POST
-/command_spec/                          CommandSpecialR                 GET POST
-/command_confirm/                       CommandConfirmR                 GET
+/birthlists/                            BirthListsR                     GET
+/birthlists/#BirthListId                BirthListR                      GET
+/birthlists/#BirthListId/#BirthListProductId BirthListProductR          GET
+
+/command/catalog/#SubCategoryId/#SubCategoryProductId CommandCatalogR   GET POST
+/command/birthlist/#BirthListId/#BirthListProductId   CommandBirthListR GET POST
+/command/special                        CommandSpecialR                 GET POST
+/command/confirm                        CommandConfirmR                 GET
 
 /about                                  AboutR                          GET
 
@@ -33,6 +39,6 @@
 /admin/birthlists/                      AdminBirthListsR                GET POST
 /admin/birthlists/#BirthListId/edit     AdminBirthListEditR             GET POST
 /admin/birthlists/#BirthListId          AdminBirthListR                 GET POST
-/admin/birthlists/#BirthListId/remove   AdminRemoveBirthListR           GET
-/admin/birthlists/#BirthListId/remprod/#BirthListProductId       AdminBirthListRemProdR     GET
-/admin/birthlists/#BirthListId/reserve/#BirthListProductId/#Bool AdminBirthListReserveProdR GET
+/admin/birthlists/#BirthListId/remove   AdminBirthListRemoveR           GET
+/admin/birthlists/#BirthListId/remprod/#BirthListProductId      AdminBirthListRemProdR     GET
+/admin/birthlists/#BirthListId/reserve/#BirthListProductId/#Int AdminBirthListReserveProdR GET

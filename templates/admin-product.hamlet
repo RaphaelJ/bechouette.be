@@ -2,12 +2,12 @@
     <div .page-header>
         <h1>Administration
 
-    <ul .nav .nav-tabs>
+    <ul .nav .nav-tabs nav-justified>
         <li .active>
             <a href=@{AdminProductsR}>
                 Produits
         <li>
-            <a href=@{AdminCatsR}>
+            <a href=@{AdminCategoriesR}>
                 Catalogue
         <li>
             <a href=@{AdminBirthListsR}>
@@ -15,12 +15,10 @@
 
     <h2>Modification du produit « #{productName prod} »
 
-    $maybe msg <- err
-        <div .alert .alert-danger>
-            <strong>#{msg}
+    <p>
+        <a .btn .btn-default href=@{AdminPicturesR prodId}>
+            <span .glyphicon .glyphicon-picture>
+            Gérer les photos du produit
 
     <form method=post action=@{AdminProductR prodId} enctype=#{enctype}>
-        <table>
-            ^{widget}
-
-        <input .btn-primary type=submit value="Modifier le produit">
+        ^{widget}

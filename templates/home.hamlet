@@ -1,7 +1,7 @@
 <div #carousel-products .carousel .slide data-ride=carousel>
     <!-- Indicators -->
     <ol .carousel-indicators>
-        $forall (i, _) <- topProds
+        $forall (i, _) <- topSubCats
             $if i == 0
                 <li data-target=#carousel-products data-slide-to=0 .active>
             $else
@@ -9,27 +9,27 @@
 
     <!-- Wrapper for slides -->
     <div .carousel-inner>
-        $forall (i, (Entity prodId prod, mPic)) <- topProds
-            $if i == 1
-                <a .item .active href=@{ProductR prodId}>
+        $forall (i, (Entity subCatId subCat, mPic)) <- topSubCats
+            $if i == 0
+                <a .item .active href=@{SubCategoryR subCatId}>
                     $maybe Entity picId pic <- mPic
                         $with picExt <- pictureExtension pic
                             <img src=@{routePicture picId PicWide picExt}
                                  alt="Mise en avant"/>
 
                     <div .carousel-caption>
-                        <h2>#{productName prod}
-                        #{productShortDesc prod}
+                        <h1>#{subCategoryName subCat}
+                        #{subCategoryShortDesc subCat}
             $else
-                <a .item href=@{ProductR prodId}>
+                <a .item href=@{SubCategoryR subCatId}>
                     $maybe Entity picId pic <- mPic
                         $with picExt <- pictureExtension pic
                             <img src=@{routePicture picId PicWide picExt}
                                  alt="Mise en avant"/>
 
                     <div .carousel-caption>
-                        <h2>#{productName prod}
-                        #{productShortDesc prod}
+                        <h1>#{subCategoryName subCat}
+                        #{subCategoryShortDesc subCat}
 
     <!-- Controls -->
     <a .left .carousel-control href="#carousel-products" data-slide=prev>
@@ -37,21 +37,22 @@
     <a .right .carousel-control href="#carousel-products" data-slide=next>
         <span .glyphicon .glyphicon-chevron-right>
 
-<div .page .catalogue>
+<div .page>
     <div .page-header>
-        <h1>Créations
+        <h1>Catalogue
 
-    $forall (Entity _ cat, prods) <- cats
+$forall (Entity _ cat, subCats) <- cats
+    <div .page>
         <h2>#{categoryName cat}
 
-        <div .products>
-            $forall (Entity prodId prod, mPic) <- prods
-                <div .product-container>
-                    <a .product href=@{ProductR prodId}>
-                        $maybe Entity picId pic <- mPic
-                         $with picExt <- pictureExtension pic
-                            <img src=@{routePicture picId PicCatalogue picExt}
-                                    alt="Produit catalogue"/>
-                        <div .info>
-                            <h3>#{productName prod}
-                            <span .description>#{productShortDesc prod}
+    <div .container .catalogue>
+        $forall (Entity subCatId subCat, mPic) <- subCats
+            <div .col-sm-6 .col-md-4 .col-lg-3 .text-center>
+                <a .product-container href=@{SubCategoryR subCatId}>
+                    $maybe Entity picId pic <- mPic
+                     $with picExt <- pictureExtension pic
+                        <img src=@{routePicture picId PicCatalogue picExt}
+                                alt="Sous-catégorie catalogue"/>
+                    <div .info>
+                        <h3>#{subCategoryName subCat}
+                        <span .description>#{subCategoryShortDesc subCat}

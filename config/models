@@ -18,8 +18,9 @@ SubCategoryProduct
 
 BirthList
     name                        Text
+    parents                     Text
     mainProduct                 ProductId Maybe
-    UniqueBirthListName         name
+    UniqueBirthListName         name parents
 
 BirthListProduct
     birthList                   BirthListId

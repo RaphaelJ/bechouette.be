@@ -1,0 +1,28 @@
+<div .carousel .slide>
+    <div .carousel-inner>
+        <div .item .active>
+            <img src=@{StaticR img_birthlists_jpg} alt="Listes de naissance"/>
+
+<div .page>
+    <div .page-header>
+        <h1>Listes de naissance
+
+    <p .notice>
+        Futur parent et intéressé par une liste de naissance Be Chouette ?
+        N'hésitez pas à
+        <strong>
+            <a href=@{AboutR}>
+                nous contacter
+        !
+
+<div .container .catalogue>
+    $forall (Entity blId bl, mPic) <- bls
+        <div .col-sm-6 .col-md-4 .col-lg-3 .text-center>
+            <a .product-container .active href=@{BirthListR blId}>
+                $maybe Entity picId pic <- mPic
+                 $with picExt <- pictureExtension pic
+                    <img src=@{routePicture picId PicCatalogue picExt}
+                            alt="Liste de naissance"/>
+                <div .info>
+                    <h3>#{birthListName bl}
+                    <span .description>Parents : #{birthListParents bl}

@@ -21,9 +21,10 @@ library
                      Settings.Development
                      Handler.About
                      Handler.Admin
+                     Handler.BirthList
+                     Handler.Catalog
                      Handler.Command
                      Handler.Home
-                     Handler.Product
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

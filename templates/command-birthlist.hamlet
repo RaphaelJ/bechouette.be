@@ -1,0 +1,36 @@
+$maybe Entity picId pic <- mPic
+ $with picExt <- pictureExtension pic
+    <div .carousel .slide>
+        <div .carousel-inner>
+            <div .item .active>
+                <img src=@{routePicture picId PicWide picExt} alt="Mise en avant"/>
+                <div .carousel-caption>
+                    <h1>Réserver un objet
+
+                    Réserver l'objet « #{productName prod} » de la liste de
+                    naissance « #{birthListName bl} ».
+
+<div .page>
+    $maybe _ <- mPic
+    $nothing
+        <h1>Réserver un produit
+        <h2>#{productName prod}
+
+    <div .notice>
+        <p>
+            Vous êtes sur le point de réserver un produit issu d'une liste de
+            naissance.
+
+        <p>
+            Nous traitons chaque demande individuellement et nous vous demandons
+            donc de remplir le plus précisément possible les informations de ce
+            formulaire.
+
+        <p>
+            Nous vous recontacterons par téléphone ou par email à la suite à
+            l'envoi de ce formulaire pour préciser et valider votre réservation.
+
+    <form method=post action=@{CommandBirthListR blId blProdId} enctype=#{enctype}>
+        ^{widget}
+
+        <div .clearfix>

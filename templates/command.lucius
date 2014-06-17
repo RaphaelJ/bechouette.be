@@ -1,6 +1,11 @@
 form {
-    .required, .optional {
+    .form-group {
         float: left;
-        min-width: 460px;
+        min-width: 50%;
+        padding: 0 10px;
+    }
+
+    .description {
+        min-height: 200px;
     }
 }

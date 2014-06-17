@@ -1,17 +1,30 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 module Handler.Admin (
       getAdminLoginR, postAdminLoginR
-    , getAdminProductsR, postAdminProductsR, getAdminProductR
-    , postAdminProductR, postAdminProductRemoveR
-    , getAdminPicturesR, postAdminPicturesR, getAdminRemovePictureR
-      
-    , getAdminEditCatR, postAdminEditCatR, getAdminRemoveCatR
-    , getAdminNewProdR, postAdminNewProdR, getAdminEditProdR, postAdminEditProdR
+
+    , getAdminProductsR, postAdminProductsR
+    , getAdminProductR, postAdminProductR, getAdminProductRemoveR
+
+    , getAdminPicturesR, postAdminPicturesR, getAdminPictureRemoveR
+
+    , getAdminCategoriesR, postAdminCategoriesR
+    , getAdminCategoryR, postAdminCategoryR, getAdminCategoryRemoveR
+
+    , getAdminSubCatNewR, postAdminSubCatNewR
+    , getAdminSubCatEditR, postAdminSubCatEditR
+    , getAdminSubCatR, postAdminSubCatR
+    , getAdminSubCatRemoveR, getAdminSubCatRemProdR
+
+    , getAdminBirthListsR, postAdminBirthListsR
+    , getAdminBirthListEditR, postAdminBirthListEditR
+    , getAdminBirthListR, postAdminBirthListR
+    , getAdminBirthListRemoveR, getAdminBirthListRemProdR
+    , getAdminBirthListReserveProdR
     ) where
 
 import Import
 import Prelude (tail)
-import Control.Applicative ((<|>))
+import Control.Applicative
 import Control.Monad
 import Data.Ratio
 import Database.Persist.Sql (askSqlConn, connPrepare, connRollback)
@@ -21,9 +34,11 @@ import System.FilePath (takeExtension)
 import qualified Vision.Image as I
 import Vision.Primitive (Z (..), (:.) (..), Rect (..))
 import Text.Printf
+import Yesod.Form.Bootstrap3
 
-import Handler.Home (listProducts)
-import Handler.BirthLists (listBirthLists)
+import Handler.Home (listCats)
+import Handler.Catalog (listSubCatProducts)
+import Handler.BirthList (listBirthLists, listBirthListProducts)
 
 sessionKey :: Text
 sessionKey = "CONNECTED"
@@ -49,7 +64,7 @@ postAdminLoginR = do
     case result of
         FormSuccess pass | pass == validPass -> do
             setSession sessionKey ""
-            redirect AdminR
+            redirect AdminProductsR
         _ -> do
             let err = Just "Mot de passe invalide." :: Maybe Text
             defaultLayout $ do
@@ -57,7 +72,9 @@ postAdminLoginR = do
                 $(widgetFile "admin-login")
 
 loginForm :: Form Text
-loginForm = renderDivs $ areq passwordField "Mot de passe" Nothing
+loginForm = renderBootstrap3 BootstrapBasicForm $
+       areq passwordField "Mot de passe" Nothing
+    <* bootstrapSubmit' "Se connecter"
 
 redirectIfConnected :: Handler ()
 redirectIfConnected = do
@@ -73,11 +90,12 @@ getAdminProductsR :: Handler Html
 getAdminProductsR = do
     redirectIfNotConnected
 
-    (widget, enctype) <- generateFormPost (prodForm Nothing)
+    (widget, enctype) <- generateFormPost (prodForm Nothing
+                                                    "Ajouter le produit")
 
     prods <- runDB $ selectList [] [Asc ProductName]
 
-    let err = Nothing
+    let err = Nothing :: Maybe Text
     defaultLayout $ do
         setTitle "Gestion des produits - Be Chouette"
         $(widgetFile "admin-products")
@@ -87,7 +105,8 @@ postAdminProductsR :: Handler Html
 postAdminProductsR = do
     redirectIfNotConnected
 
-    ((result, widget), enctype) <- runFormPost (prodForm Nothing)
+    ((result, widget), enctype) <- runFormPost (prodForm Nothing
+                                                         "Ajouter le produit")
 
     prods <- runDB $ selectList [] [Asc ProductName]
 
@@ -95,33 +114,35 @@ postAdminProductsR = do
         FormSuccess prod -> do
             m <- runDB $ insertUnique prod
             case m of
-                Just _  -> return $! Just ("Nom de produit existant." :: Text)
-                Nothing -> redirect AdminProductsR
+                Just _  -> redirect AdminProductsR
+                Nothing -> return $! Just ("Nom de produit existant." :: Text)
         _               -> return Nothing
 
     defaultLayout $ do
         setTitle "Ajouter un nouveau produit - Be Chouette"
         $(widgetFile "admin-products")
 
-getAdminEditProdR :: ProductId -> Handler Html
-getAdminEditProdR prodId = do
+getAdminProductR :: ProductId -> Handler Html
+getAdminProductR prodId = do
     redirectIfNotConnected
 
     prod <- runDB $ get404 prodId
 
-    (widget, enctype) <- generateFormPost (prodForm (Just prod))
+    (widget, enctype) <- generateFormPost (prodForm (Just prod)
+                                                    "Modifier le produit")
 
     defaultLayout $ do
         setTitle "Modifier un produit - Be Chouette"
         $(widgetFile "admin-product")
 
-postAdminEditProdR :: ProductId -> Handler Html
-postAdminEditProdR prodId = do
+postAdminProductR :: ProductId -> Handler Html
+postAdminProductR prodId = do
     redirectIfNotConnected
 
     prod <- runDB $ get404 prodId
 
-    ((result, widget), enctype) <- runFormPost (prodForm (Just prod))
+    ((result, widget), enctype) <- runFormPost (prodForm (Just prod)
+                                                         "Modifier le produit")
 
     case result of
         FormSuccess newProd -> do
@@ -148,27 +169,39 @@ removeProduct prodId = do
     forM_ pics $ \(Entity picId pic) -> do
         removePicture picId (pictureExtension pic)
 
-    subcats <- selectList [SubCategoryProductProduct ==. prodId] []
-    forM_ subcats $ delete . entityKey
+    subCatProds <- selectList [SubCategoryProductProduct ==. prodId] []
+    forM_ subCatProds $ delete . entityKey
 
-    birthlists <- selectList [BirthListProductProduct ==. prodId] []
-    forM_ birthlists $ delete . entityKey
+    subCats <- selectList [SubCategoryMainProduct ==. Just prodId] []
+    forM_ subCats $ flip update [SubCategoryMainProduct =. Nothing] . entityKey
 
-prodForm :: Maybe Product -> Form Product
-prodForm mCatId prod html =
-    flip renderDivs html $ Product
-        <$> areq textField "Nom du produit" (productName <$> prod)
-        <*> aopt textField "Référence du produit (facultatif)"
-                (productRef <$> prod)
-        <*> areq textField "Description rapide (pour catalogue et Facebook)"
-                (productShortDesc <$> prod)
-        <*> areq textareaField "Description complète (pour la fiche produit)"
-                (productDesc <$> prod)
-        <*> areq textareaField "Détails (tailles, couleurs, lavage, ...)"
+    blProds <- selectList [BirthListProductProduct ==. prodId] []
+    forM_ blProds $ delete . entityKey
+
+    bls <- selectList [BirthListMainProduct ==. Just prodId] []
+    forM_ bls $ flip update [BirthListMainProduct =. Nothing] . entityKey
+
+prodForm :: Maybe Product -> BootstrapSubmit Text -> Form Product
+prodForm prod submitMsg =
+    renderBootstrap3 BootstrapBasicForm $ Product
+        <$> areq textField (bfs' "Nom du produit") (productName <$> prod)
+        <*> aopt textField
+                 (bfs' "Référence du produit (facultatif)")
+                 (productRef <$> prod)
+        <*> areq textField
+                 (bfs' "Description rapide (pour catalogue et Facebook)")
+                 (productShortDesc <$> prod)
+        <*> areq textareaField
+                 (bfs' "Description complète (pour la fiche produit)")
+                 (productDesc <$> prod)
+        <*> areq textareaField (bfs' "Détails (tailles, couleurs, lavage, ...)")
                 (productDetails <$> prod)
         <*> aopt doubleField
-                "Prix (facultatif, '.' pour séparer les décimales)"
+                (bfs' "Prix (facultatif, '.' pour séparer les décimales)")
                 (productPrice <$> prod)
+        <*> areq checkBoxField (bfs' "Disponible à la vente")
+                 (productAvailable <$> prod)
+        <* bootstrapSubmit' submitMsg
 
 -- Photos ----------------------------------------------------------------------
 
@@ -250,8 +283,8 @@ postAdminPicturesR prodId = do
             Just msg -> error (show msg)
             Nothing  -> return ()
 
-    picSize PicSmall     = Z :. 75  :. 75
-    picSize PicLarge     = Z :. 400 :. 350
+    picSize PicSmall     = Z :. 55  :. 55
+    picSize PicLarge     = Z :. 269 :. 235
     picSize PicWide      = Z :. 300 :. 1170
     picSize PicCatalogue = Z :. 80  :. 255
     picSize PicOriginal  = undefined
@@ -260,10 +293,12 @@ postAdminPicturesR prodId = do
                   liftIO $ connRollback conn (connPrepare conn)
 
 pictureForm :: Form FileInfo
-pictureForm = renderDivs $ fileAFormReq "Fichier de l'image"
+pictureForm = renderBootstrap3 BootstrapBasicForm $
+       areq fileField (bfs' "Fichier de l'image") Nothing
+    <* bootstrapSubmit' "Ajouter l'image"
 
-getAdminRemovePictureR :: PictureId -> Handler ()
-getAdminRemovePictureR picId = do
+getAdminPictureRemoveR :: PictureId -> Handler ()
+getAdminPictureRemoveR picId = do
     redirectIfNotConnected
 
     prodId <- runDB $ do
@@ -291,10 +326,12 @@ getAdminCategoriesR :: Handler Html
 getAdminCategoriesR = do
     redirectIfNotConnected
 
-    (widget, enctype) <- generateFormPost $ categoryForm Nothing
+    (widget, enctype) <-
+        generateFormPost $ categoryForm Nothing "Créer la catégorie"
 
     cats <- runDB listCats
 
+    let err = Nothing :: Maybe Text
     defaultLayout $ do
         setTitle "Gestion des catégories - Be Chouette"
         $(widgetFile "admin-categories")
@@ -304,7 +341,8 @@ postAdminCategoriesR :: Handler Html
 postAdminCategoriesR = do
     redirectIfNotConnected
 
-    ((result, widget), enctype) <- runFormPost $ categoryForm Nothing
+    ((result, widget), enctype) <-
+        runFormPost $ categoryForm Nothing "Créer la catégorie"
 
     err <- case result of
         FormSuccess cat -> do
@@ -327,9 +365,10 @@ getAdminCategoryR catId = do
 
     cat <- runDB $ get404 catId
 
-    (widget, enctype) <- generateFormPost $ categoryForm (Just cat)
+    (widget, enctype) <-
+        generateFormPost $ categoryForm (Just cat) "Modifier la catégorie"
 
-    let err = Nothing
+    let err = Nothing :: Maybe Text
     defaultLayout $ do
         setTitle "Modifier une catégorie - Be Chouette"
         $(widgetFile "admin-category")
@@ -340,29 +379,25 @@ postAdminCategoryR catId = do
 
     cat <- runDB $ get404 catId
 
-    ((result, widget), enctype) <- runFormPost $ categoryForm Nothing
+    ((result, widget), enctype) <- 
+        runFormPost $ categoryForm (Just cat) "Modifier la catégorie"
 
     err <- case result of
         FormSuccess cat' -> do
-            m <- runDB $
-                -- Teste si une catégorie du même nom existe.
-                mCatName <- getBy $ CategoryName $ categoryName cat'
-                case mCatName of
-                    Just (Entity catNameId _) | catNameId /= catId ->
-                        return $! Just ("Nom de catégorie existant." :: Text)
-                    _                                              -> do
-                        runDB $ update catId cat'
-                        return Nothing
+            -- Teste si une catégorie du même nom existe.
+            mCatName <- runDB $ getBy $ UniqueCategoryName $ categoryName cat'
+            case mCatName of
+                Just (Entity catNameId _) | catNameId /= catId ->
+                    return $! Just ("Nom de catégorie existant." :: Text)
+                _                                              -> do
+                    runDB $ replace catId cat'
+                    redirect AdminCategoriesR
         _                ->
             return Nothing
 
-    case err of
-        Just _ -> do
-            defaultLayout $ do
-                setTitle "Modifier une catégorie - Be Chouette"
-                $(widgetFile "admin-category")
-        Nothing ->
-            redirect AdminCategoriesR
+    defaultLayout $ do
+        setTitle "Modifier une catégorie - Be Chouette"
+        $(widgetFile "admin-category")
 
 getAdminCategoryRemoveR :: CategoryId -> Handler ()
 getAdminCategoryRemoveR catId = do
@@ -372,15 +407,21 @@ getAdminCategoryRemoveR catId = do
         _ <- delete catId
         subCats <- selectList [SubCategoryCategory ==. catId]
                               [Asc SubCategoryName]
-        forM_ subCats (delete . entityKey)
+        forM_ subCats $ \(Entity subCatId _) -> do
+            prods <- listSubCatProducts subCatId
+            forM_ prods $ delete . entityKey . fst
+
+            delete subCatId
 
     redirect AdminCategoriesR
 
-categoryForm :: Maybe Category -> Form Category
-categoryForm cat = renderDivs $ Category
-    <$> areq textField "Nom de la catégorie" (categoryName <$> cat)
-    <*> areq intField  "Ordre de la catégorie (classées par ordre croissant)"
+categoryForm :: Maybe Category -> BootstrapSubmit Text -> Form Category
+categoryForm cat submitMsg = renderBootstrap3 BootstrapBasicForm $ Category
+    <$> areq textField (bfs' "Nom de la catégorie") (categoryName <$> cat)
+    <*> areq intField
+             (bfs' "Ordre de la catégorie (classées par ordre croissant)")
              (categoryOrder <$> cat)
+    <*  bootstrapSubmit' submitMsg
 
 -- Sous-catégories -------------------------------------------------------------
 
@@ -391,8 +432,9 @@ getAdminSubCatNewR catId = do
 
     cat <- runDB $ get404 catId
 
-    let err = Nothing
-    (widget, enctype) <- generateFormPost $ subCatForm catId [] Nothing
+    let err = Nothing :: Maybe Text
+    (widget, enctype) <-
+        generateFormPost $ subCatForm catId [] Nothing "Créer la sous-catégorie"
 
     defaultLayout $ do
         setTitle "Ajouter une sous-catégorie - Be Chouette"
@@ -404,14 +446,15 @@ postAdminSubCatNewR catId = do
 
     cat <- runDB $ get404 catId
 
-    ((result, widget), enctype) <- runFormPost $ subCatForm catId [] Nothing
+    ((result, widget), enctype) <-
+        runFormPost $ subCatForm catId [] Nothing "Créer la sous-catégorie"
 
     err <- case result of
         FormSuccess subCat -> do
             m <- runDB $ insertUnique subCat
             case m of
-                Just _  -> return $! Just ("Nom de catégorie existant." :: Text)
-                Nothing ->  redirect AdminCategoriesR
+                Nothing -> return $! Just ("Nom de catégorie existant." :: Text)
+                Just _  -> redirect AdminCategoriesR
         _                  -> return Nothing
 
     defaultLayout $ do
@@ -425,11 +468,13 @@ getAdminSubCatEditR subCatId = do
 
     (subCat, prods) <- runDB $
         (,) <$> get404 subCatId
-            <*> listSubCatProducts subCatId
+            <*> (map snd <$> listSubCatProducts subCatId)
 
-    let err   = Nothing
+    let err   = Nothing :: Maybe Text
         catId = subCategoryCategory subCat
-    (widget, enctype) <- generateFormPost $ subCatForm catId prods (Just subCat)
+    (widget, enctype) <-
+        generateFormPost $ subCatForm catId prods (Just subCat)
+                                      "Modifier la sous-catégorie"
 
     defaultLayout $ do
         setTitle "Modifier une sous-catégorie - Be Chouette"
@@ -441,21 +486,24 @@ postAdminSubCatEditR subCatId = do
 
     (subCat, prods) <- runDB $
         (,) <$> get404 subCatId
-            <*> listSubCatProducts subCatId
+            <*> (map snd <$> listSubCatProducts subCatId)
 
     let catId = subCategoryCategory subCat
-    ((result, widget), enctype) <- runFormPost $ subCatForm catId prods
-                                                            (Just subCat)
+    ((result, widget), enctype) <-
+        runFormPost $ subCatForm catId prods (Just subCat)
+                                 "Modifier la sous-catégorie"
 
     err <- case result of
         FormSuccess subCat' -> do
             -- Teste si une catégorie du même nom existe.
-            mSubCatName <- getBy $ SubCategoryName $ subCategoryName subCat'
+            let subCatName' = subCategoryName subCat'
+            mSubCatName <- runDB $ getBy $ UniqueSubCategoryName catId
+                                                                 subCatName'
             case mSubCatName of
-                Just (Entity subCatNameId _) | subCatNameId /= subCatCatId ->
+                Just (Entity subCatNameId _) | subCatNameId /= subCatId ->
                     return $! Just ("Nom de catégorie existant." :: Text)
                 _                                                          -> do
-                    runDB $ update subCatId subCat'
+                    runDB $ replace subCatId subCat'
                     redirect AdminCategoriesR
         _                   -> return Nothing
 
@@ -464,20 +512,22 @@ postAdminSubCatEditR subCatId = do
         $(widgetFile "admin-subcategory-edit")
 
 subCatForm :: CategoryId -> [Entity Product] -> Maybe SubCategory
-           -> Form SubCategory
-subCatForm catId prods subCat = renderDivs $ SubCategory catId
-    <$> areq textField     "Nom de la sous-catégorie"
-             (subCategoryName <$> subCat)
-    <*> areq textField     "Description rapide (pour catalogue)"
-             (subCategoryShortDesc <$> subCat)
-    <*> mainProductField
-    <*> areq checkBoxField "Afficher en grand sur la page d'acceuil"
-             (subCategoryTop <$> subCat)
+           -> BootstrapSubmit Text -> Form SubCategory
+subCatForm catId prods subCat submitMsg =
+    renderBootstrap3 BootstrapBasicForm $ SubCategory catId
+        <$> areq textField     (bfs' "Nom de la sous-catégorie")
+                 (subCategoryName <$> subCat)
+        <*> areq textField     (bfs' "Description rapide (pour catalogue)")
+                 (subCategoryShortDesc <$> subCat)
+        <*> mainProductField
+        <*> areq checkBoxField (bfs' "Afficher en grand sur la page d'acceuil")
+                 (subCategoryTop <$> subCat)
+        <* bootstrapSubmit' submitMsg
   where
     mainProductField | null prods = pure Nothing
                      | otherwise  =
         aopt (selectFieldList (productNames prods))
-             "Produit principal (utilisé pour la photo)"
+             (bfs' "Produit principal (utilisé pour la photo)")
              (subCategoryMainProduct <$> subCat)
 
 -- | Liste les produits d'une sous-catégorie.
@@ -485,11 +535,12 @@ getAdminSubCatR :: SubCategoryId -> Handler Html
 getAdminSubCatR subCatId = do
     redirectIfNotConnected
 
-    (subCat, prods) <- runDB $
-        (, ) <$> get404 subCatId
+    (subCat, notProds, prods) <- runDB $
+        (,,) <$> get404 subCatId
              <*> listNotSubCatProducts subCatId
+             <*> listSubCatProducts    subCatId
 
-    (widget, enctype) <- generateFormPost $ productSelectionForm prods
+    (widget, enctype) <- generateFormPost $ productSelectionForm notProds
 
     defaultLayout $ do
         setTitle "Modifier les produits d'une sous-catégorie - Be Chouette"
@@ -500,14 +551,17 @@ postAdminSubCatR :: SubCategoryId -> Handler Html
 postAdminSubCatR subCatId = do
     redirectIfNotConnected
 
-    (subCat, prods) <- runDB $
-        (, ) <$> get404 subCatId
+    (subCat, notProds, prods) <- runDB $
+        (,,) <$> get404 subCatId
              <*> listNotSubCatProducts subCatId
+             <*> listSubCatProducts    subCatId
 
-    ((result, widget), enctype) <- runFormPost $ productSelectionForm prods
+    ((result, widget), enctype) <- runFormPost $ productSelectionForm notProds
 
     case result of
-        FormSuccess prodId -> insertUnique $ SubCategoryProduct subCatId prodId
+        FormSuccess prodId -> do
+            _ <- runDB $ insertUnique $ SubCategoryProduct subCatId prodId
+            redirect (AdminSubCatR subCatId)
         _                  -> return ()
 
     defaultLayout $ do
@@ -524,36 +578,32 @@ getAdminSubCatRemoveR subCatId = do
         delete subCatId
 
         prods <- listSubCatProducts subCatId
-        forM_ prods $ delete . entityKey
+        forM_ prods $ delete . entityKey . fst
 
     redirect AdminCategoriesR
 
 -- | Supprime un produit de la sous catégorie.
 getAdminSubCatRemProdR :: SubCategoryId -> SubCategoryProductId -> Handler ()
-getAdminSubCatRemProdR subCatId subCatProductId = do
+getAdminSubCatRemProdR subCatId subCatProdId = do
     redirectIfNotConnected
 
-    prods <- runDB $ do
-        subCat <- get404 subCatId
-        delete subCatProductId
+    runDB $ do
+        subCat     <- get404 subCatId
+        subCatProd <- get404 subCatProdId
+        delete subCatProdId
 
-        when (subCategoryMainProduct subCat == Just subCatProductId) $
-            update subCatId subCat { subCategoryMainProduct = Nothing }
+        let prodId = subCategoryProductProduct subCatProd
+        when (subCategoryMainProduct subCat == Just prodId) $
+            update subCatId [SubCategoryMainProduct =. Nothing]
 
     redirect (AdminSubCatR subCatId)
-
-listSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
-listSubCatProducts subCatId = do
-    subCatProds <- selectList [SubCategoryProductSubCategory ==. subCatId] []
-
-    selectList [ProductId <-. map subCategoryProductProduct subCatProds]
-               [Asc ProductName]
 
 listNotSubCatProducts :: SubCategoryId -> YesodDB App [Entity Product]
 listNotSubCatProducts subCatId = do
     subCatProds <- selectList [SubCategoryProductSubCategory ==. subCatId] []
 
-    selectList [ProductId /<-. map subCategoryProductProduct subCatProds]
+    selectList [ProductId /<-. map (subCategoryProductProduct . entityVal) 
+                                   subCatProds]
                [Asc ProductName]
 
 -- Listes de naissance ---------------------------------------------------------
@@ -563,27 +613,29 @@ getAdminBirthListsR :: Handler Html
 getAdminBirthListsR = do
     redirectIfNotConnected
 
-    (widget, enctype) <- generateFormPost $ birthlistForm [] Nothing
+    (widget, enctype) <-
+        generateFormPost $ birthlistForm [] Nothing "Créer la liste"
 
     bls <- runDB $ listBirthLists
 
-    let err = Nothing
+    let err = Nothing :: Maybe Text
     defaultLayout $ do
         setTitle "Gérer les listes de naissance - Be Chouette"
         $(widgetFile "admin-birthlists")
 
-postAdminBirthListR :: Handler Html
-postAdminBirthListR = do
+postAdminBirthListsR :: Handler Html
+postAdminBirthListsR = do
     redirectIfNotConnected
 
-    ((result, widget), enctype) <- runFormPost $ birthlistForm [] Nothing
+    ((result, widget), enctype) <-
+        runFormPost $ birthlistForm [] Nothing "Créer la liste"
 
     err <- case result of
         FormSuccess bl -> do
             m <- runDB $ insertUnique bl
             case m of
-                Just _  -> return $! Just ("Nom de liste existant." :: Text)
-                Nothing -> redirect AdminBirthListR
+                Nothing -> return $! Just ("Nom de liste existant." :: Text)
+                Just _  -> redirect AdminBirthListsR
         _               -> return Nothing
 
     bls <- runDB $ listBirthLists
@@ -599,10 +651,11 @@ getAdminBirthListEditR blId = do
 
     (bl, prods) <- runDB $
         (,) <$> get404 blId
-            <*> (map snd <$> listBirthListProducts subCatId)
+            <*> (map snd <$> listBirthListProducts blId)
 
-    let err   = Nothing
-    (widget, enctype) <- generateFormPost $ birthlistForm prods (Just bl)
+    let err   = Nothing :: Maybe Text
+    (widget, enctype) <- 
+        generateFormPost $ birthlistForm prods (Just bl)  "Modifier la liste"
 
     defaultLayout $ do
         setTitle "Modifier une liste de naissance - Be Chouette"
@@ -616,17 +669,19 @@ postAdminBirthListEditR blId = do
         (,) <$> get404 blId
             <*> (map snd <$> listBirthListProducts blId)
 
-    ((result, widget), enctype) <- runFormPost $ birthlistForm prods (Just bl)
+    ((result, widget), enctype) <-
+        runFormPost $ birthlistForm prods (Just bl) "Modifier la liste"
 
     err <- case result of
         FormSuccess bl' -> do
             -- Teste si une liste du même nom existe.
-            mBlName <- getBy $ BirthListName $ birthListName bl'
+            mBlName <- runDB $ getBy $
+                UniqueBirthListName (birthListName bl') (birthListParents bl')
             case mBlName of
                 Just (Entity blNameId _) | blNameId /= blId ->
                     return $! Just ("Nom de liste existant." :: Text)
                 _                                           -> do
-                    runDB $ update blId bl'
+                    runDB $ replace blId bl'
                     redirect AdminBirthListsR
         _               -> return Nothing
 
@@ -634,9 +689,14 @@ postAdminBirthListEditR blId = do
         setTitle "Modifier une liste de naissance - Be Chouette"
         $(widgetFile "admin-birthlist-edit")
 
-birthlistForm :: [Entity Product] -> Maybe BirthList -> Form BirthList
-birthlistForm prods bl = renderDivs $ BirthList
-    <$> areq textField "Nom de la liste de naissance" (birthListyName <$> bl)
+birthlistForm :: [Entity Product] -> Maybe BirthList -> BootstrapSubmit Text
+              -> Form BirthList
+birthlistForm prods bl submitMsg =
+    renderBootstrap3 BootstrapBasicForm $ BirthList
+        <$> areq textField (bfs' "Nom de l'enfant") (birthListName <$> bl)
+        <*> areq textField (bfs' "Nom des parents") (birthListParents <$> bl)
+        <*> mainProductField
+        <*  bootstrapSubmit' submitMsg
   where
     mainProductField | null prods = pure Nothing
                      | otherwise  =
@@ -649,11 +709,12 @@ getAdminBirthListR :: BirthListId -> Handler Html
 getAdminBirthListR blId = do
     redirectIfNotConnected
 
-    (bl, prods) <- runDB $
-        (, ) <$> get404 blId
+    (bl, notProds, prods) <- runDB $
+        (,,) <$> get404 blId
              <*> listNotBirthListProducts blId
+             <*> listBirthListProducts    blId
 
-    (widget, enctype) <- generateFormPost $ productSelectionForm prods
+    (widget, enctype) <- generateFormPost $ productSelectionForm notProds
 
     defaultLayout $ do
         setTitle "Modifier les produits d'une liste de naissance - Be Chouette"
@@ -664,14 +725,17 @@ postAdminBirthListR :: BirthListId -> Handler Html
 postAdminBirthListR blId = do
     redirectIfNotConnected
 
-    (bl, prods) <- runDB $
-        (, ) <$> get404 blId
+    (bl, notProds, prods) <- runDB $
+        (,,) <$> get404 blId
              <*> listNotBirthListProducts blId
+             <*> listBirthListProducts    blId
 
-    ((result, widget), enctype) <- runFormPost $ productSelectionForm prods
+    ((result, widget), enctype) <- runFormPost $ productSelectionForm notProds
 
     case result of
-        FormSuccess prodId -> insertUnique $ BirthListProduct blId prodId False
+        FormSuccess prodId -> do
+            _ <- runDB $ insertUnique $ BirthListProduct blId prodId False
+            redirect (AdminBirthListR blId)
         _                  -> return ()
 
     defaultLayout $ do
@@ -693,46 +757,41 @@ getAdminBirthListRemoveR blId = do
     redirect AdminBirthListsR
 
 -- | Supprime un produit de la liste de naissance.
-getAdminSubCatRemProdR :: BirthListId -> BirthListProductId -> Handler ()
-getAdminSubCatRemProdR blId blProductId = do
+getAdminBirthListRemProdR :: BirthListId -> BirthListProductId -> Handler ()
+getAdminBirthListRemProdR blId blProdId = do
     redirectIfNotConnected
 
-    prods <- runDB $ do
-        bl <- get404 blId
-        delete blProductId
+    runDB $ do
+        bl     <- get404 blId
+        blProd <- get404 blProdId
+        delete blProdId
 
-        when (birthListMainProduct bl == Just blProductId) $
-            update blId bl { birthListMainProduct = Nothing }
+        let prodId = birthListProductProduct blProd
+        when (birthListMainProduct bl == Just prodId) $
+            update blId [BirthListMainProduct =. Nothing]
 
     redirect (AdminBirthListR blId)
 
 -- | Réserve un produit de la liste de naissance.
-getAdminSubCatRemProdR :: BirthListId -> ProductId -> Bool -> Handler ()
-getAdminSubCatRemProdR blId blProdId reserve = do
+getAdminBirthListReserveProdR :: BirthListId -> BirthListProductId -> Int
+                              -> Handler ()
+getAdminBirthListReserveProdR blId blProdId reserve = do
     redirectIfNotConnected
 
-    prods <- runDB $ do
-        bl     <- get404 blId
-        blProd <- get404 blProdId
+    runDB $ do
+        _ <- get404 blId
+        _ <- get404 blProdId
 
-        update blProdId { birthListProductReserved = reserve }
+        update blProdId [BirthListProductReserved =. toEnum reserve]
 
     redirect (AdminBirthListR blId)
 
-listBirthListProducts :: BirthListId
-                      -> YesodDB App [(Entity BirthListProduct, Entity Product)]
-listBirthListProducts blId = do
-    blProds <- selectList [BirthListId ==. blId] []
-
-    forM blProds $ \blProdEntity@(Entity _ blProd) -> do
-        prod <- get (birthListProductProduct blProd)
-        return (blProdEntity, prod)
-
 listNotBirthListProducts :: BirthListId -> YesodDB App [Entity Product]
 listNotBirthListProducts blId = do
-    blProds <- selectList [BirthListId ==. blId] []
+    blProds <- selectList [BirthListProductBirthList ==. blId] []
 
-    selectList [ProductId /<-. map birthListProductProduct blProds]
+    selectList [ProductId /<-. map (birthListProductProduct . entityVal) 
+                                   blProds]
                [Asc ProductName]
 
 -- -----------------------------------------------------------------------------
@@ -741,8 +800,9 @@ productNames :: [Entity Product] -> [(Text, ProductId)]
 productNames = map (\(Entity prodId prod) -> (productName prod, prodId))
 
 productSelectionForm :: [Entity Product] -> Form ProductId
-productSelectionForm prods = renderDivs $
-    areq (selectFieldList (productNames prods)) "Produit" Nothing
+productSelectionForm prods = renderBootstrap3 BootstrapBasicForm $
+       areq (selectFieldList (productNames prods)) (bfs' "Produit") Nothing
+    <* bootstrapSubmit' "Ajouter le produit"
 
 redirectIfNotConnected :: Handler ()
 redirectIfNotConnected = do

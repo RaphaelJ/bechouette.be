@@ -1,8 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Handler.Home (getHomeR, subCatPic, productPic) where
+module Handler.Home (
+      getHomeR
+    , listTopSubCats, listCats, subCatPic
+    ) where
 
 import Import
 import Control.Monad
+
+import Handler.Catalog (productPic)
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -15,7 +20,7 @@ getHomeR = do
         setTitle "Créations - Be Chouette"
         $(widgetFile "home")
 
-listTopSubCats :: YesodDB App [(Entity Product, Maybe (Entity Picture))]
+listTopSubCats :: YesodDB App [(Entity SubCategory, Maybe (Entity Picture))]
 listTopSubCats = do
     subCats <- selectList [SubCategoryTop ==. True] []
     forM subCats $ \subCatEntity@(Entity _ subCat) -> do
@@ -28,17 +33,15 @@ listCats :: YesodDB App [
 listCats = do
     cats <- selectList [] [Asc CategoryOrder, Asc CategoryName]
     forM cats $ \cat@(Entity catId _) -> do
-        subCats <- selectList [ProductCategory ==. catId] [Asc ProductName]
+        subCats <- selectList [SubCategoryCategory ==. catId]
+                              [Asc SubCategoryName]
         subCatsPics <- forM subCats $ \subCatEntity@(Entity _ subCat) -> do
             mPic <- subCatPic subCat
             return (subCatEntity, mPic)
         return (cat, subCatsPics)
 
-subCatPic :: Entity SubCategory -> YesodDB App (Maybe (Entity Picture))
-subCatPic subCat
-    | Just prodId <- subCategoryMainProduct subCat = productPic prodId
-    | otherwise                                    = return Nothing
-
--- | Retourne la première image du produit.
-productPic :: ProductId -> YesodDB App (Maybe (Entity Picture))
-productPic prodId = selectFirst [PictureProduct ==. prodId] [Asc PictureId]
+subCatPic :: SubCategory -> YesodDB App (Maybe (Entity Picture))
+subCatPic subCat =
+    case subCategoryMainProduct subCat of
+        Just prodId -> productPic prodId
+        Nothing     -> return Nothing

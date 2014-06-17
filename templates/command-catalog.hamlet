@@ -1,14 +1,15 @@
 $maybe Entity picId pic <- mPic
-    $with picExt <- pictureExtension pic
-        <div .carrousel>
-            <div .item>
+ $with picExt <- pictureExtension pic
+    <div .carousel .slide>
+        <div .carousel-inner>
+            <div .item .active>
                 <img src=@{routePicture picId PicWide picExt} alt="Mise en avant"/>
-                <div .info>
-                    <h2>Commande d'une création
-                    <span .description>
-                        Faire une demande personalisée pour la création
-                        « #{productName prod} ».
-$nothing
+                <div .carousel-caption>
+                    <h1>Commande d'une création
+
+                    Faire une demande personalisée pour la création
+                    « #{productName prod} ».
+
 <div .page>
     $maybe _ <- mPic
     $nothing
@@ -27,11 +28,9 @@ $nothing
 
         <p>
             Nous vous recontacterons par téléphone ou par email à la suite à
-            l'envoi de ce formulaire pour préciser et éventuellement valider
-            votre commande.
+            l'envoi de ce formulaire pour préciser et valider votre commande.
 
-    <form method=post action=@{CommandProductR prodId} enctype=#{enctype}>
+    <form method=post action=@{CommandCatalogR subCatId subCatProdId} enctype=#{enctype}>
         ^{widget}
 
-        <div .clear_float>
-        <input .btn type=submit value="Soumettre ma demande" />
+        <div .clearfix>

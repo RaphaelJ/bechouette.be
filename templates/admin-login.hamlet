@@ -8,5 +8,3 @@
 
     <form method=post action=@{AdminLoginR} enctype=#{enctype}>
         ^{widget}
-
-        <input .btn-primary type=submit value=Connexion>

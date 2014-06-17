@@ -2,43 +2,29 @@
     <div .page-header>
         <h1>Administration
 
-    <ul .nav .nav-tabs>
+    <ul .nav .nav-tabs nav-justified>
         <li>
             <a href=@{AdminProductsR}>
                 Produits
         <li .active>
-            <a href=@{AdminCatsR}>
+            <a href=@{AdminCategoriesR}>
                 Catalogue
         <li>
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
 
-    <h2>Ajouter une nouvelle catégorie
-
-    $maybe msg <- err
-        <div .alert .alert-danger>
-            <strong>#{msg}
-
-    <form role=form method=post action=@{AdminCategoriesR} enctype=#{enctype}>
-        <table>
-            ^{widget}
-
-        <input .btn-primary type=submit value="Créer la catégorie">
-
-    <h2>Catégories existantes
+    <h2>Catégories
 
     $forall (Entity catId cat, subcats) <- cats
         <h3>#{categoryName cat} (ordre : #{categoryOrder cat})
 
-        <a href=@{AdminSubCatNewR catId}>
+        <a .btn .btn-default href=@{AdminSubCatNewR catId}>
             <span .glyphicon .glyphicon-plus>
             Ajouter une sous-catégorie
-        •
-        <a href=@{AdminCategoryR catId}>
+        <a .btn .btn-default href=@{AdminCategoryR catId}>
             <span .glyphicon .glyphicon-edit>
             Modifier cette catégorie
-        •
-        <a href=@{AdminCategoryRemoveR catId}
+        <a .btn .btn-default href=@{AdminCategoryRemoveR catId}
            onclick="return confirm('Etes-vous certain de vouloir supprimer la catégorie');">
             <span .glyphicon .glyphicon-remove>
             Supprimer cette catégorie
@@ -49,15 +35,22 @@
                     <p>
                         <strong>#{subCategoryName subCat}
 
-                    <a href=@{AdminSubCatR subCatId}>
+                    <a .btn .btn-default href=@{AdminSubCatEditR subCatId}>
                         <span .glyphicon .glyphicon-edit>
                         Modifier cette sous-catégorie
-                    •
-                    <a href=@{AdminSubCatProductsR subCatId}>
+                    <a .btn .btn-default href=@{AdminSubCatR subCatId}>
                         <span .glyphicon .glyphicon-list>
                         Gérer les produits de cette sous-catégorie
-                    •
-                    <a href=@{AdminSubCatRemoveR subCatId}
+                    <a .btn .btn-default href=@{AdminSubCatRemoveR subCatId}
                        onclick="return confirm('Etes-vous certain de vouloir supprimer cette sous-catégorie');">
                         <span .glyphicon .glyphicon-remove>
                         Supprimer cette sous-catégorie
+
+    <h2 name=form>Ajouter une nouvelle catégorie
+
+    $maybe msg <- err
+        <div .alert .alert-danger>
+            <strong>#{msg}
+
+    <form role=form method=post action="@{AdminCategoriesR}#form" enctype=#{enctype}>
+        ^{widget}

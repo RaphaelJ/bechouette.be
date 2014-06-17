@@ -1,0 +1,105 @@
+<div .container>
+    <div .col-lg-3 .nav-products>
+        <div .page-header>
+            <h3>#{subCategoryName subCat}
+
+        <ul .nav .nav-pills .nav-stacked>
+            $forall ((Entity subCatProdId _, Entity prodId prod), mPic) <- prods
+                $if prodId == currProdId
+                    <li .active>
+                        <a href=@{SubCategoryProductR subCatId subCatProdId}>
+                            $maybe Entity picId pic <- mPic
+                             $with picExt <- pictureExtension pic
+                                <img .pull-left src=@{routePicture picId PicSmall picExt}
+                                    alt=#{productName prod}>
+
+                            <div .info>
+                                <span .name>#{productName prod}
+                                <br />
+                                $maybe price <- productPrice currProd
+                                    <span .price>#{price} €
+                                $nothing
+                                    <span .price>Prix sur demande
+                            <div .clearfix>
+                $else
+                    <li>
+                        <a href=@{SubCategoryProductR subCatId subCatProdId}>
+                            $maybe Entity picId pic <- mPic
+                             $with picExt <- pictureExtension pic
+                                <img .pull-left src=@{routePicture picId PicSmall picExt}
+                                    alt=#{productName prod}>
+
+                            <div .info>
+                                <span .name>#{productName prod}
+                                <br />
+                                $maybe price <- productPrice prod
+                                    <span .price>#{price} €
+                                $nothing
+                                    <span .price>Prix sur demande
+                            <div .clearfix>
+
+    <div .col-lg-6 .product>
+        <div .page-header>
+            <h1>
+                #{productName currProd}
+                <small>
+                    $maybe price <- productPrice currProd
+                        <span .price>#{price} €
+                    $nothing
+                        <span .price>Prix sur demande
+
+            $maybe ref <- productRef currProd
+                <p .ref>Référence : #{ref}
+
+
+        <h3>Description
+        <p .description>#{productDesc currProd}
+
+        <h4>Détails
+        <p .details>#{productDetails currProd}
+
+        <div .share>
+            <a href=https://www.facebook.com/sharer/sharer.php?u=@{SubCategoryProductR subCatId currSubCatProdId}
+               target="_BLANK">
+                <span .glyphicon .glyphicon-thumbs-up>
+                Partager sur Facebook
+            &nbsp;•&nbsp;
+            $if null currProdPics
+                <a href="//pinterest.com/pin/create/button/?url=@{SubCategoryProductR subCatId currSubCatProdId}&description=#{productName currProd}"
+                    target="_BLANK">
+                    <span .glyphicon .glyphicon-pushpin>
+                    Epingler sur Pinterest
+            $else
+             $with Entity picId pic <- head currProdPics
+              $with picExt <- pictureExtension pic
+                <a href="//pinterest.com/pin/create/button/?url=@{SubCategoryProductR subCatId currSubCatProdId}&media=@{routePicture picId PicLarge picExt}&description=#{productName currProd}"
+                    target="_BLANK">
+                    <span .glyphicon .glyphicon-pushpin>
+                    Epingler sur Pinterest
+
+        <p .command>
+            $if productAvailable currProd
+                <a .btn .btn-primary href=@{CommandCatalogR subCatId currSubCatProdId}>
+                    <span .glyphicon .glyphicon-shopping-cart>
+                    Commander cette création
+            $else
+                <a .btn .btn-primary .disabled>
+                    <span .glyphicon .glyphicon-shopping-cart>
+                    Création non disponible pour le moment
+
+    <div .col-lg-3 .pictures .text-center>
+        $if null currProdPics
+        $else
+          $with Entity picId pic <- head currProdPics
+           $with picExt <- pictureExtension pic
+            <a #large_pic_link .thumbnail .large_pic
+               href=@{routePicture picId PicOriginal picExt}
+               target=_BLANK >
+                <img #large_pic src=@{routePicture picId PicLarge picExt}
+                     alt="Image du produit" title="Image du produit"/>
+
+            <div .mini_pics>
+                $forall Entity picId pic <- currProdPics
+                 $with picExt <- pictureExtension pic
+                    <a onclick="selectPicture('@{routePicture picId PicLarge picExt}', '@{routePicture picId PicOriginal picExt}')">
+                        <img .img-thumbnail src=@{routePicture picId PicSmall picExt} alt="Miniature du produit"/>

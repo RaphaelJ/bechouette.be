@@ -22,21 +22,70 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR} .enabled>Catalogue
                             <li>
-                                <a href=@{CommandSpecialR}>Listes de naissance
+                                <a href=@{BirthListsR}>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
                                 <a href=@{AboutR}>A propos de Be Chouette
-                        $of ProductR _
+                        $of SubCategoryR _
                             <li>
                                 <a href=@{HomeR} .enabled>Catalogue
+                            <li>
+                                <a href=@{BirthListsR}>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
                                 <a href=@{AboutR}>A propos de Be Chouette
-                        $of CommandProductR _
+                        $of SubCategoryProductR _ _
                             <li>
                                 <a href=@{HomeR} .enabled>Catalogue
+                            <li>
+                                <a href=@{BirthListsR}>Listes de naissance
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of BirthListR _
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of BirthListProductR _ _
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of BirthListsR
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of CommandCatalogR _ _
+                            <li>
+                                <a href=@{HomeR} .enabled>Catalogue
+                            <li>
+                                <a href=@{BirthListsR}>Listes de naissance
+                            <li>
+                                <a href=@{CommandSpecialR}>Demande spéciale
+                            <li>
+                                <a href=@{AboutR}>A propos de Be Chouette
+                        $of CommandBirthListR _ _
+                            <li>
+                                <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{CommandSpecialR} .enabled>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
@@ -44,6 +93,8 @@ $maybe msg <- mmsg
                         $of CommandSpecialR
                             <li>
                                 <a href=@{HomeR}>Catalogue
+                            <li>
+                                <a href=@{BirthListsR}>Listes de naissance
                             <li>
                                 <a href=@{CommandSpecialR} .enabled>
                                     Demande spéciale
@@ -53,6 +104,8 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR}>Catalogue
                             <li>
+                                <a href=@{BirthListsR}>Listes de naissance
+                            <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
                                 <a href=@{AboutR} .enabled>
@@ -61,12 +114,16 @@ $maybe msg <- mmsg
                             <li>
                                 <a href=@{HomeR}>Catalogue
                             <li>
+                                <a href=@{BirthListsR}>Listes de naissance
+                            <li>
                                 <a href=@{CommandSpecialR}>Demande spéciale
                             <li>
                                 <a href=@{AboutR}>A propos de Be Chouette
                 $nothing
                     <li>
                         <a href=@{HomeR}>Catalogue
+                    <li>
+                        <a href=@{BirthListsR}>Listes de naissance
                     <li>
                         <a href=@{CommandSpecialR}>Demande spéciale
                     <li>
@@ -77,11 +134,11 @@ $maybe msg <- mmsg
 
     ^{widget}
 
-    <footer>
+    <footer .footer>
         <a .facebook href=https://www.facebook.com/BeChouette target=_BLANK>
-            <span .glyphicon .glyphicon-globe>
+            <span .glyphicon .glyphicon-thumbs-up>
             Suivez notre page Facebook !
-        &nbsp;• © 2013 Be Chouette
+        &nbsp;• <span .glyphicon .glyphicon-copyright-mark> Be Chouette
         &nbsp;• Site web par&nbsp;
         <a href="https://github.com/RaphaelJ/bechouette.be">
             Raphael Javaux

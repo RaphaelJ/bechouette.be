@@ -1,7 +1,7 @@
 Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
-  approot: "http://192.168.10.200:3000"
+  approot: "http://192.168.0.3:3000"
   email: raphaeljavaux@gmail.com
   password: pass
 

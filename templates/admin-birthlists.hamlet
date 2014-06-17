@@ -2,43 +2,37 @@
     <div .page-header>
         <h1>Administration
 
-    <ul .nav .nav-tabs>
+    <ul .nav .nav-tabs nav-justified>
         <li>
             <a href=@{AdminProductsR}>
                 Produits
         <li>
-            <a href=@{AdminCatsR}>
+            <a href=@{AdminCategoriesR}>
                 Catalogue
         <li .active>
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
+    <h2>Listes de naissance existantes
 
-    <h2>Ajouter une nouvelle liste de naissance
+    $forall (Entity blId bl, _) <- bls
+        <h3>#{birthListName bl} - Parents : #{birthListParents bl}
+
+        <a .btn .btn-default href=@{AdminBirthListR blId}>
+            <span .glyphicon .glyphicon-list>
+            Gérer les produits de cette liste
+        <a .btn .btn-default href=@{AdminBirthListEditR blId}>
+            <span .glyphicon .glyphicon-edit>
+            Modifier cette liste
+        <a .btn .btn-default href=@{AdminBirthListRemoveR blId}
+           onclick="return confirm('Etes-vous certain de vouloir supprimer la liste');">
+            <span .glyphicon .glyphicon-remove>
+            Supprimer cette liste
+
+    <h2 name=form>Ajouter une nouvelle liste de naissance
 
     $maybe msg <- err
         <div .alert .alert-danger>
             <strong>#{msg}
 
-    <form role=form method=post action=@{AdminBirthListsR} enctype=#{enctype}>
-        <table>
-            ^{widget}
-
-        <input .btn-primary type=submit value="Créer la liste de naissance">
-
-    <h2>Listes de naissance existantes
-
-    $forall (Entity blId bl, bls) <- bls
-        <h3>#{birthListName bl}
-
-        <a href=@{AdminBirthListR blId}>
-            <span .glyphicon .glyphicon-list>
-            Gérer les produits de cette liste
-        •
-        <a href=@{AdminBirthListEditR catId}>
-            <span .glyphicon .glyphicon-edit>
-            Modifier cette liste
-        •
-        <a href=@{AdminBirthListRemoveR catId}
-           onclick="return confirm('Etes-vous certain de vouloir supprimer la liste');">
-            <span .glyphicon .glyphicon-remove>
-            Supprimer cette liste
+    <form role=form method=post action="@{AdminBirthListsR}#form" enctype=#{enctype}>
+        ^{widget}

@@ -9,9 +9,8 @@
         <p>
             <strong>
                 Si vous souhaitez commander une de nos créations existantes,
-                nous vous convions à utiliser notre
-                <a href=@{HomeR}>catalogue en ligne
-                .
+                nous vous convions à utiliser
+                notre <a href="@{HomeR}">catalogue en ligne</a>.
 
         <p>
             Nous traitons chaque demande individuellement et nous vous demandons
@@ -26,5 +25,4 @@
     <form method=post action=@{CommandSpecialR} enctype=#{enctype}>
         ^{widget}
 
-        <div .clear_float>
-        <input .btn type=submit value="Soumettre ma demande" />
+        <div .clearfix>

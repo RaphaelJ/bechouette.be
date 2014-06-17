@@ -2,48 +2,45 @@
     <div .page-header>
         <h1>Administration
 
-    <ul .nav .nav-tabs>
+    <ul .nav .nav-tabs nav-justified>
         <li>
             <a href=@{AdminProductsR}>
                 Produits
         <li>
-            <a href=@{AdminCatsR}>
+            <a href=@{AdminCategoriesR}>
                 Catalogue
         <li .active>
             <a href=@{AdminBirthListsR}>
                 Listes de naissance
 
-    <h2>Modifier les produits de la liste « #{birthListName bl} »
+    <h2>Produits de la liste « #{birthListName bl} »
 
-    <a href=@{AdminBirthListEditR blId}>
+    <a .btn .btn-default href=@{AdminBirthListEditR blId}>
         <span .glyphicon .glyphicon-edit>
         Modifier cette liste
 
-    <h3>Ajouter un nouveau produit
-
-    <form method=post action=@{AdminBirthListR blId} enctype=#{enctype}>
-        <table>
-            ^{widget}
-
-        <input .btn-primary type=submit value="Ajouter le produit">
-
-    <h3>Produits
-
     <ul>
-        $forall (Entity blProdId blProd, Entity _ prod) <- prods
+        $forall (Entity blProdId blProd, Entity prodId prod) <- prods
             <li>
                 <p>
                     <strong>#{productName prod}
 
                 $if birthListProductReserved blProd
-                    <a href=@{AdminBirthListReserveProdR blId blProdId False}>
-                        <span .glyphicon .glyphicon-remove>
+                    <a .btn .btn-default href=@{AdminBirthListReserveProdR blId blProdId 0}>
+                        <span .glyphicon .glyphicon-bookmark>
                         Marquer ce produit comme non réservé
                 $else
-                    <a href=@{AdminBirthListReserveProdR blId blProdId True}>
-                        <span .glyphicon .glyphicon-remove>
+                    <a .btn .btn-default href=@{AdminBirthListReserveProdR blId blProdId 1}>
+                        <span .glyphicon .glyphicon-bookmark>
                         Marquer ce produit comme réservé
-                •
-                <a href=@{AdminBirthListRemProdR blId prodId}>
+                <a .btn .btn-default href=@{AdminProductR prodId}>
+                    <span .glyphicon .glyphicon-edit>
+                    Modifier le produit
+                <a .btn .btn-default href=@{AdminBirthListRemProdR blId blProdId}>
                     <span .glyphicon .glyphicon-remove>
                     Retirer ce produit de la liste
+
+    <h2 name=form>Ajouter un nouveau produit
+
+    <form method=post action="@{AdminBirthListR blId}#form" enctype=#{enctype}>
+        ^{widget}
